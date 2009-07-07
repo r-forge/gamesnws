@@ -43,7 +43,28 @@ echo $contents; } ?>
 
 <!-- end of project description -->
 
-<p> No content added. </p>
+<h2>How to play a game?</h2>
+<p>Everyone has to install the 'gamesNWS' and 'NWS' package. 
+Than a master user is required:
+<ul>
+  <li>First of all you need a running NWS Server. The installation is quite simple: http://nws-r.sourceforge.net/</li>
+  <li>A master player has to create the game: ws <- createUnoGame('MyGame', serverHost='localhost')</li>
+  <li>The master user has to start the game: startUnoGame(ws) </li>
+</ul>
+Than all players have to connect to the server: playUno('MyGame', serverHost='localhost')<br>
+The rest is quite simple and will be explained during the game.
+</p>
+
+<h2>ToDo's</h2>
+<ul>
+  <li>Finish first game: UNO</li>
+  <li>Implement second game: POKER</li>
+  <li>Write documentation</li>
+  <li>Provide NWS-Game Server for everyone</li>
+</ul>
+
+<h2>How to add further games to the 'gamesNWS' package?</h2>
+<p>ToDo</p>
 
 <p> The <strong>project summary page</strong> you can find <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/"><strong>here</strong></a>. </p>
 
