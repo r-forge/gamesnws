@@ -1,0 +1,11 @@
+Package: gamesNws
+Type: Package
+Title: Playing games using a NWS Server
+Version: 0.1
+Date: 2009-07-01
+Author: Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>
+Maintainer: Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>
+Depends: nws
+Description: A package with different games (e.g. uno, poker, ...) using a NWS Server. You can play the games with your friends in the whole world. Just install a NWS Server, send the login data to your friends and start the game. 
+License: GPL
+LazyLoad: yes
