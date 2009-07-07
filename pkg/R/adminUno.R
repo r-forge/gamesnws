@@ -13,7 +13,7 @@ createUnoGame <- function(wsName, ...)
 	nwsDeclare(ws, 'players', 'fifo')
 	nwsDeclare(ws, 'played', 'lifo') #lifo
 	nwsDeclare(ws, 'cards', 'lifo')
-	nwsDeclare(ws, 'startplayers', 'single')
+	nwsDeclare(ws, 'players_logedin', 'single')
 	nwsDeclare(ws, 'winner', 'single')
 	# user declares own variable for his hand-cards in .playUnoMaster()
 
@@ -32,6 +32,8 @@ createUnoGame <- function(wsName, ...)
 )
 	for( i in 1:length(cards))
 		nwsStore(ws, 'cards', cards[i])
+	
+	nwsStore(ws, 'players_logedin', 'master')
 
 	cat("Send the name and the server address to your other players!\n")
 	cat("Start the game with 'startUnoGame(ws)'\n")
@@ -44,7 +46,9 @@ createUnoGame <- function(wsName, ...)
 # especially to get commands from master-user
 # and to wait for other players
 ############################################################
-startUnoGame <- function(ws, cardsStart=7, minPlayers=2, maxPlayers=10, log=FALSE, logfile=NULL)
+startUnoGame <- function(ws, cardsStart=7, 
+		minPlayers=2, maxPlayers=10, 
+		log=FALSE, logfile=NULL)
 {
 
 	readCommand <- ""
@@ -52,18 +56,12 @@ startUnoGame <- function(ws, cardsStart=7, minPlayers=2, maxPlayers=10, log=FALS
 
 		# Ask for command from master user
 		readCommand <- readline("Players online [o], Start Game [s], End Game [e]")
-		# get players from new
-		mat <- as.matrix( nwsListVars(ws, showDataFrame=T) )
-		id <- which( mat[,1] == "players")
-		nplayers <- unlist(mat[id,2])
-		if(nplayers!=0){
-			players <- vector()
-			for(i in 1:nplayers){
-				players[i] <- nwsFetchTry(ws, 'players')
-				nwsStore(ws, "players", players[i])
-			}
-		} else
-			players <- ""
+	
+		# get players
+		players <- nwsFindTry(ws, 'players_logedin')
+		if( any(players=="master"))
+			players <- players[ -which( players == "master")]
+		nplayers <- length(players)
 
 		# Commands for actions depending on master-user Input
 		if(readCommand=="s" && nplayers>=minPlayers && nplayers<=maxPlayers){
@@ -95,9 +93,13 @@ startUnoGame <- function(ws, cardsStart=7, minPlayers=2, maxPlayers=10, log=FALS
 ##############################################################
 .playUnoMaster <- function(ws, players, cardsStart, log=FALSE, logfile=NULL){
 
-	#Store all players in one vector
-	nwsStore(ws, "startplayers", players)
-
+	#Store all players in one vector and in players variable
+	if( any(players=="master"))
+		players <- players[ -which( players == "master")]
+	nwsStore(ws, "players_logedin", players)
+	for( i in 1:length(players))
+		nwsStore(ws, "players", players[i])
+	
 	# Get all cards
 	cards <- vector()
 	i <- 1
