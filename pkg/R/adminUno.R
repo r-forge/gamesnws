@@ -12,24 +12,33 @@ createUnoGame <- function(wsName, ...)
 	# TODO alles declarieren
 	nwsDeclare(ws, 'players', 'fifo')
 	nwsDeclare(ws, 'played', 'lifo') #lifo
-	nwsDeclare(ws, 'cards', 'lifo')
+	nwsDeclare(ws, 'cards', 'lifo') #fifo ??
 	nwsDeclare(ws, 'players_logedin', 'single')
+	nwsDeclare(ws, 'player_in_action', 'single')
 	nwsDeclare(ws, 'winner', 'single')
 	# user declares own variable for his hand-cards in .playUnoMaster()
 
 	# initialize cards as described in wikipedia
-	# and store in nws
+	# mischen and store in nws
 	cards <- c( paste("red", 1:9, sep="-"), paste("red", 1:9, sep="-"), "red-0",
-#			"red-BREAK", "red-BACK", "red-2+", "red-BREAK", "red-BACK", "red-2+",
+			rep("red-BREAK",2), 
+			rep("red-2+",2), 
+			rep("red-BACK",2),
 			paste("yellow", 1:9, sep="-"), paste("yellow", 1:9, sep="-"), "yellow-0",
-#			"yellow-BREAK", "yellow-BACK", "yellow-2+", "yellow-BREAK", "yellow-BACK", "yellow-2+",
+			rep("yellow-BACK",2), 
+			rep("yellow-2+"), 
+			rep("yellow-BREAK",2),
 			paste("blue", 1:9, sep="-"), paste("blue", 1:9, sep="-"), "blue-0",
-#			"blue-BREAK", "blue-BACK", "blue-2+", "blue-BREAK", "blue-BACK", "blue-2+",
+			rep("blue-BACK",2), 
+			rep("blue-2+",2), 
+			rep("blue-BREAK",2),
 			paste("green", 1:9, sep="-"), paste("green", 1:9, sep="-"), "green-0",
-#			"green-BREAK", "green-BACK", "green-2+", "green-BREAK", "green-BACK", "green-2+",
-			rep("rybg-0", 4)
-#			rep("rybg-4+",4) 
-)
+			rep("green-BREAK",2),
+			rep("green-2+",2),
+			rep("green-BACK",2),
+			rep("rybg-0", 4), rep("rybg-4+",4)
+	)
+	cards <- sample(cards)
 	for( i in 1:length(cards))
 		nwsStore(ws, 'cards', cards[i])
 	
@@ -55,7 +64,7 @@ startUnoGame <- function(ws, cardsStart=7,
 	while(readCommand != "e"){
 
 		# Ask for command from master user
-		readCommand <- readline("Players online [o], Start Game [s], End Game [e]")
+		readCommand <- readline("Players online [o], Start Game [s], End Game [e]?")
 	
 		# get players
 		players <- nwsFindTry(ws, 'players_logedin')
@@ -68,14 +77,17 @@ startUnoGame <- function(ws, cardsStart=7,
 			# Start game	
 			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile)
 			#TODO, replay!
-			# readCommand <- readline("End Game [e]")
-			readCommand <- "e"
+			readCommand <- readline("End Game [e] or Replay [r]?")
+			if( readCommand == "r" ){
+				#TODO replay
+			}
 		} else if( ! (nplayers>=minPlayers) &&  readCommand=="s"){
 			cat("You need more than ", nplayers," player!\n")
 		} else if( ! (nplayers<=maxPlayers) &&  readCommand=="s"){
 			cat("You can only play with less than ", nplayers," players!\n")
 		} else if(readCommand=="o") 
 			cat("Players:", players, "\n")
+		
 	}
 
 	# At the end close / delete game and nws Server
@@ -117,13 +129,22 @@ startUnoGame <- function(ws, cardsStart=7,
 	cat("\tGive Cards\n")
 	cards_players <- split(cards[1:(length(players)*cardsStart)], sample(rep(1:length(players), cardsStart)) )
 	for( p in 1:length(players)){
-		nwsDeclare(ws, players[p], 'lifo')
 		nwsStore(ws, players[p], unlist(cards_players[p])) 
 	}
 
 	# open one card to table
 	cat("\tOpen first Card\n")
-	nwsStore(ws, 'played', nwsFetch(ws, 'cards'))
+	first_card <- nwsFetch(ws, 'cards')
+	first_card_color <- strsplit(unlist(first_card), "-")[[1]][1]
+	first_card_number <- strsplit(unlist(first_card), "-")[[1]][2]
+	if( first_card_color =="rybg")
+		first_card <- sample(c("red-rybg", "yellow-rybg", "blue-rybg", "green-rybg"),1)
+	if( first_card_number == "4+")
+		first_card <- paste(first_card, "4+", sep="")
+	nwsStore(ws, 'played', first_card)
+	
+	# set player_in_action and start game
+	nwsStore(ws, 'player_in_action', players[length(players)])
 
 	cat("\tGame is running:\n")
 	if(log==TRUE){
@@ -158,6 +179,7 @@ startUnoGame <- function(ws, cardsStart=7,
 		if(i==0) run<-0
 		# look for variable
 		tmp <- nwsFindTry(ws, variable)
+		Sys.sleep(0.1)
 	}
 	# close txtProgressBar
 	close(pb)
@@ -177,18 +199,32 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
 		ws <- netWorkSpace(ws, ...)
 	}
 	
-	# read played cards
-	card_played_tmp <- ""
-	user <- ""
-	while( is.null(winner <- nwsFindTry(ws, 'winner')) ){
-		card_played <- nwsFindTry(ws, 'played') 
-		if( card_played != card_played_tmp ){
-			cat(user, ": ", card_played, "\n", sep="")
-			user <- nwsFindTry(ws, 'players')
-			card_played_tmp <- card_played		
-		}
-	}
 	
+	# read played cards
+	card_played <- card_played_tmp <- ""
+	user <- user_tmp <- ""
+	while( is.null(winner <- nwsFindTry(ws, 'winner'))
+		|| card_played != card_played_tmp 
+		|| user != user_tmp
+		){
+		card_played <- nwsFindTry(ws, 'played') 
+
+		#if cards change: output
+		if( card_played != card_played_tmp ){
+			cat(user, ": ", card_played, " (",length(nwsFindTry(ws,user)),")\n", sep="")
+			user <- nwsFindTry(ws, 'player_in_action')
+			user_tmp <- user # save player 
+			card_played_tmp <- card_played # save card
+		# if user change and no card: output
+		}else if( user != user_tmp){
+			cat(user_tmp, ": NO (",length(nwsFindTry(ws,user_tmp)),")\n", sep="")
+			#user <- nwsFindTry(ws, 'players')
+			user_tmp <- user
+		}
+		user <- nwsFindTry(ws, 'player_in_action')
+		Sys.sleep(0.1)
+	}
+		
 	#return winner
 	return(winner)
 }
