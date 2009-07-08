@@ -27,11 +27,13 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 <table border="0" width="100%" cellspacing="0" cellpadding="0">
 <tr><td>
 <a href="/"><img src="<?php echo $themeroot; ?>/images/logo.png" border="0" alt="R-Forge Logo" /> </a> </td> </tr>
+<tr><td align="right">
+<img src="images/gamesNWS.jpg" border="0" alt="R-gamesNWS Logo" /></td> </tr>
 </table>
 
 
 <!-- get project title  -->
-<!-- own website starts here, the following may be changed as you like -->
+<!-- own website starts here, the following may be changed as you like 
 
 <?php if ($handle=fopen('http://'.$domain.'/export/projtitl.php?group_name='.$group_name,'r')){
 $contents = '';
@@ -41,17 +43,29 @@ while (!feof($handle)) {
 fclose($handle);
 echo $contents; } ?>
 
-<!-- end of project description -->
+ end of project description -->
+ 
+<h1>Welcome to Playing games with R using a NWS Server project!</h1>
+<p>The R package 'gamesNWS' provides an infrastructure to play different 
+games (e.g. uno, poker) in a network. You can play the games with your friends 
+in the whole world or against several computer players at your local machine. 
+For the communication a NetWorkSpace Server and the R package NWS will be used. 
+Just install a NWS Server, send the login data to your friends and start the game. 
+</p>
 
 <h2>How to play a game?</h2>
 <p>Everyone has to install the 'gamesNWS' and 'NWS' package. 
-Than a master user is required:
+<ul>
+  <li>install.packages("gamesNWS",repos="http://R-Forge.R-project.org")</li>
+  <li>install.packages("NWS")</li>
+<ul>
+Than a master user (one of the players) is required:
 <ul>
   <li>First of all you need a running NWS Server. The installation is quite simple: http://nws-r.sourceforge.net/</li>
   <li>A master player has to create the game: ws <- createUnoGame('MyGame', serverHost='localhost')</li>
   <li>The master user has to start the game: startUnoGame(ws) </li>
 </ul>
-Than all players have to connect to the server: playUno('MyGame', serverHost='localhost')<br>
+Than all players have to connect to the same server: playUno('MyGame', serverHost='localhost')<br>
 The rest is quite simple and will be explained during the game.
 </p>
 
