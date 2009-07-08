@@ -58,7 +58,7 @@ Just install a NWS Server, send the login data to your friends and start the gam
 <ul>
   <li>install.packages("gamesNWS",repos="http://R-Forge.R-project.org")</li>
   <li>install.packages("NWS")</li>
-<ul>
+</ul>
 Than a master user (one of the players) is required:
 <ul>
   <li>First of all you need a running NWS Server. The installation is quite simple: http://nws-r.sourceforge.net/</li>
