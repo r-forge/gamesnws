@@ -9,10 +9,9 @@ createUnoGame <- function(wsName, ...)
 	ws <- netWorkSpace(wsName, ...)
 
 	# declate variables in nws
-	# TODO alles declarieren
 	nwsDeclare(ws, 'players', 'fifo')
 	nwsDeclare(ws, 'played', 'lifo') #lifo
-	nwsDeclare(ws, 'cards', 'lifo') #fifo ??
+	nwsDeclare(ws, 'cards', 'fifo') #fifo ??
 	nwsDeclare(ws, 'players_logedin', 'single')
 	nwsDeclare(ws, 'player_in_action', 'single')
 	nwsDeclare(ws, 'winner', 'single')
@@ -121,16 +120,15 @@ startUnoGame <- function(ws, cardsStart=7,
 	}
 
 	# create stock at table (nws)
-	cards <- cards[(1+length(players)*cardsStart):length(cards)]
-	for( i in 1:length(cards))
-		nwsStore(ws, 'cards', cards[i])
+	cards_stock <- cards[(1+length(players)*cardsStart):length(cards)]
+	for( i in 1:length(cards_stock))
+		nwsStore(ws, 'cards', cards_stock[i])
 
 	#Distribute cards to player
 	cat("\tGive Cards\n")
 	cards_players <- split(cards[1:(length(players)*cardsStart)], sample(rep(1:length(players), cardsStart)) )
-	for( p in 1:length(players)){
+	for( p in 1:length(players))
 		nwsStore(ws, players[p], unlist(cards_players[p])) 
-	}
 
 	# open one card to table
 	cat("\tOpen first Card\n")
@@ -179,7 +177,7 @@ startUnoGame <- function(ws, cardsStart=7,
 		if(i==0) run<-0
 		# look for variable
 		tmp <- nwsFindTry(ws, variable)
-		Sys.sleep(0.1)
+		Sys.sleep(0.1) #to reduce requests to NWS
 	}
 	# close txtProgressBar
 	close(pb)

@@ -44,11 +44,30 @@ playUno <- function(name,
 			else i <- i-1
 			if(i==10) run<-1
 			if(i==0) run<-0
-			Sys.sleep(0.1)
+			Sys.sleep(0.1) #to reduce requests to NWS
 		}
 		close(pb)
 		playerInAction <- nwsFindTry(ws, 'player_in_action')
 		
+		# Check card stack for enough cards
+		tmp<-nwsListVars(ws, wsName=ws@wsName, showDataFrame=TRUE)
+		ncards <- tmp[tmp[,1]=="cards",]$"NumValues"
+		if( ncards < 5 ){
+			played <- nwsFetchTry(ws, 'played')
+			rest_played <- vector()
+			i=1
+			while( !is.null(tmp <- nwsFetchTry(ws,'played'))){
+				rest_played[i] <- tmp 
+				i <- i + 1
+			}
+			rest_played <- sample(rest_played)
+			for(i in 1:length(rest_played)){
+				nwsStore(ws, 'cards', rest_played[i])
+			}
+			nwsStore(ws, 'played', played)
+		}
+			
+
 		
 		#Play Card if there is no winner
 		card_play <- ""
@@ -90,7 +109,7 @@ playUno <- function(name,
 				card_play_save <- tmp$played
 				cat("Play:", card_play_save, "\n")
 				# computer palyer to fast for NWS
-				Sys.sleep(0.5)
+				Sys.sleep(0.1)
 			} else{
 				# for user
 				card_play <- readline("Play: ")
