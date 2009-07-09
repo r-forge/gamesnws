@@ -1,7 +1,66 @@
-###########################################################
-# Main Function to play UNO for user
-######################################################
-playUno <- function(name, 
+\name{playUno}
+\Rdversion{1.1}
+\alias{playUno}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{
+%%  ~~function to do ... ~~
+}
+\description{
+%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+}
+\usage{
+playUno(name, user = Sys.info()["user"], computerPlayer = FALSE, computerPlayerFunction = computerPlayerUNO, ...)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{name}{
+%%     ~~Describe \code{name} here~~
+}
+  \item{user}{
+%%     ~~Describe \code{user} here~~
+}
+  \item{computerPlayer}{
+%%     ~~Describe \code{computerPlayer} here~~
+}
+  \item{computerPlayerFunction}{
+%%     ~~Describe \code{computerPlayerFunction} here~~
+}
+  \item{\dots}{
+%%     ~~Describe \code{\dots} here~~
+}
+}
+\details{
+%%  ~~ If necessary, more details than the description above ~~
+}
+\value{
+%%  ~Describe the value returned
+%%  If it is a LIST, use
+%%  \item{comp1 }{Description of 'comp1'}
+%%  \item{comp2 }{Description of 'comp2'}
+%% ...
+}
+\references{
+%% ~put references to the literature/web site here ~
+}
+\author{
+%%  ~~who you are~~
+}
+\note{
+%%  ~~further notes~~
+}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+%% ~~objects to See Also as \code{\link{help}}, ~~~
+}
+\examples{
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function(name, 
 		user=Sys.info()["user"], 
 		computerPlayer=FALSE, computerPlayerFunction=computerPlayerUNO, 
 		...)
@@ -67,13 +126,7 @@ playUno <- function(name,
 			nwsStore(ws, 'played', played)
 		}
 			
-		# SOME OUTPUT
-		# all players and there number of cards in the hand
-		players <- nwsFindTry(ws, "players_logedin")
-		cat("Players: ")
-		for(p in players)
-			cat(p, "(",length(nwsFindTry(ws,p)),"): ", sep="")
-		cat("\n")
+
 		
 		#Play Card if there is no winner
 		card_play <- ""
@@ -81,6 +134,12 @@ playUno <- function(name,
 		while(card_play=="" && is.null(nwsFindTry(ws, "winner")) && playerInAction==user ){
 			
 			# SOME OUTPUT
+			# get all players
+			players <- nwsFindTry(ws, "players_logedin")
+			cat("Players: ")
+			for(p in players)
+				cat(p, "(",length(nwsFindTry(ws,p)),"): ", sep="")
+			cat("\n")
 			# get played card
 			played <- nwsFindTry(ws, 'played')
 			#split for color and number
@@ -99,17 +158,17 @@ playUno <- function(name,
 				cards <- c(cards, nwsFetchTry(ws,"cards"), nwsFetchTry(ws,"cards"),nwsFetchTry(ws,"cards"), nwsFetchTry(ws,"cards"))
 				nwsStore(ws, user, cards)
 			}
-			cat("Hand:", sort(unlist(cards)), "\n") #sorted output
+			cat("Hand:", unlist(cards), "\n")
 			
 			# PLAY CARD
 			if(computerPlayer == TRUE){
 				#for computer player
 				tmp <- computerPlayerFunction(cards, played)
-				card_play <- tmp$selectedCard
-				card_play_save <- tmp$playedCard
+				card_play <- tmp$sel
+				card_play_save <- tmp$played
 				cat("Play:", card_play_save, "\n")
 				# computer palyer to fast for NWS
-				Sys.sleep(0.2)
+				Sys.sleep(0.1)
 			} else{
 				# for user
 				card_play <- readline("Play: ")
@@ -128,8 +187,8 @@ playUno <- function(name,
 			
 			#ACTION DEPENDONG ON CARD TYPE
 			#split for color and number
-			card_play_color <- strsplit(card_play_save, "-")[[1]][1]
-			card_play_number <- strsplit(card_play_save, "-")[[1]][2]
+			card_play_color <- strsplit(card_play, "-")[[1]][1]
+			card_play_number <- strsplit(card_play, "-")[[1]][2]
 			
 			if(card_play=="NO"){
 				# if there is no matching card in the hand
@@ -149,7 +208,7 @@ playUno <- function(name,
 					#card_play=NO
 				}
 				
-			}else if(card_play=="rybg-0" && played_color == card_play_color){
+			}else if(card_play=="rybg-0"){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -164,7 +223,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 				
-			}else if(card_play=="rybg-4+" && played_color == card_play_color){
+			}else if(card_play=="rybg-4+"){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -179,7 +238,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 	
-			}else if(card_play_number=="BREAK" && played_color == card_play_color){
+			}else if(card_play_number=="BREAK"){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -196,7 +255,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 	
-			}else if(card_play_number=="BACK" && played_color == card_play_color){
+			}else if(card_play_number=="BACK"){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -211,6 +270,7 @@ playUno <- function(name,
 						players_tmp[i] <- tmp 
 						i <- i + 1
 					}
+					print(players_tmp)
 					for(i in (length(players_tmp)-1):1){
 						nwsStore(ws, 'players', players_tmp[i])
 					}
@@ -221,7 +281,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 	
-			}else if(card_play_number=="2+" && played_color == card_play_color){
+			}else if(card_play_number=="2+"){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -236,7 +296,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 	
-			}else if(!(card_play %in% unlist(cards))){
+			}else if(!(card_play \%in\% unlist(cards))){
 				cat("\tCard not in your cards!\n\t'NO' for new card.\n")
 				card_play <- ""
 
@@ -271,30 +331,9 @@ playUno <- function(name,
 	
 	# close nws connection
 	nwsClose(ws)
+  }
 }
-
-######################################################
-# Computer Player for UNO
-# very stupid - RANDOM
-#####################################################
-computerPlayerUNO <- function(hand, card_played)
-{
-	# try for every card in the hand
-	for( h in 1:length(hand)){
-		#split cards for color and numner
-		hand_color <- strsplit(hand[h], "-")[[1]][1] 
- 		hand_number <- strsplit(hand[h], "-")[[1]][2]
-		played_color <- strsplit(card_played, "-")[[1]][1]
-		played_number <- strsplit(card_played, "-")[[1]][2]
-		# if color or number matches, return
-		if(hand_color == played_color || hand_number == played_number)
-			return(list(selectedCard=hand[h], playedCard=hand[h]))
-		# if color wish card, randomly choose one color
-		if(hand_color == "rybg")
-			return(list(selectedCard=hand[h], playedCard=sample(c("red-rybg", "yellow-rybg", "blue-rybg", "green-rybg"),1)))
-	}	
-	# if there is no matching card in the hand, NO card can be played
-	return(list(selectedCard="NO", playedCard="NO"))
-}
-
-
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{ ~kwd1 }
+\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
