@@ -67,7 +67,13 @@ playUno <- function(name,
 			nwsStore(ws, 'played', played)
 		}
 			
-
+		# SOME OUTPUT
+		# all players and there number of cards in the hand
+		players <- nwsFindTry(ws, "players_logedin")
+		cat("Players: ")
+		for(p in players)
+			cat(p, "(",length(nwsFindTry(ws,p)),"): ", sep="")
+		cat("\n")
 		
 		#Play Card if there is no winner
 		card_play <- ""
@@ -75,12 +81,6 @@ playUno <- function(name,
 		while(card_play=="" && is.null(nwsFindTry(ws, "winner")) && playerInAction==user ){
 			
 			# SOME OUTPUT
-			# get all players
-			players <- nwsFindTry(ws, "players_logedin")
-			cat("Players: ")
-			for(p in players)
-				cat(p, "(",length(nwsFindTry(ws,p)),"): ", sep="")
-			cat("\n")
 			# get played card
 			played <- nwsFindTry(ws, 'played')
 			#split for color and number
@@ -99,14 +99,14 @@ playUno <- function(name,
 				cards <- c(cards, nwsFetchTry(ws,"cards"), nwsFetchTry(ws,"cards"),nwsFetchTry(ws,"cards"), nwsFetchTry(ws,"cards"))
 				nwsStore(ws, user, cards)
 			}
-			cat("Hand:", unlist(cards), "\n")
+			cat("Hand:", sort(unlist(cards)), "\n") #sorted output
 			
 			# PLAY CARD
 			if(computerPlayer == TRUE){
 				#for computer player
 				tmp <- computerPlayerFunction(cards, played)
-				card_play <- tmp$sel
-				card_play_save <- tmp$played
+				card_play <- tmp$selectedCard
+				card_play_save <- tmp$playedCard
 				cat("Play:", card_play_save, "\n")
 				# computer palyer to fast for NWS
 				Sys.sleep(0.1)
@@ -128,8 +128,8 @@ playUno <- function(name,
 			
 			#ACTION DEPENDONG ON CARD TYPE
 			#split for color and number
-			card_play_color <- strsplit(card_play, "-")[[1]][1]
-			card_play_number <- strsplit(card_play, "-")[[1]][2]
+			card_play_color <- strsplit(card_play_save, "-")[[1]][1]
+			card_play_number <- strsplit(card_play_save, "-")[[1]][2]
 			
 			if(card_play=="NO"){
 				# if there is no matching card in the hand
@@ -149,7 +149,7 @@ playUno <- function(name,
 					#card_play=NO
 				}
 				
-			}else if(card_play=="rybg-0"){
+			}else if(card_play=="rybg-0" && played_color == card_play_color){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -164,7 +164,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 				
-			}else if(card_play=="rybg-4+"){
+			}else if(card_play=="rybg-4+" && played_color == card_play_color){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -179,7 +179,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 	
-			}else if(card_play_number=="BREAK"){
+			}else if(card_play_number=="BREAK" && played_color == card_play_color){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -196,7 +196,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 	
-			}else if(card_play_number=="BACK"){
+			}else if(card_play_number=="BACK" && played_color == card_play_color){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -211,7 +211,6 @@ playUno <- function(name,
 						players_tmp[i] <- tmp 
 						i <- i + 1
 					}
-					print(players_tmp)
 					for(i in (length(players_tmp)-1):1){
 						nwsStore(ws, 'players', players_tmp[i])
 					}
@@ -222,7 +221,7 @@ playUno <- function(name,
 				} else
 					nwsStore(ws, "winner", playerInAction)
 	
-			}else if(card_play_number=="2+"){
+			}else if(card_play_number=="2+" && played_color == card_play_color){
 				#remove card from hand
 				cards <- cards[-which(cards==card_play)]
 				nwsStore(ws, user, cards)
@@ -289,13 +288,13 @@ computerPlayerUNO <- function(hand, card_played)
 		played_number <- strsplit(card_played, "-")[[1]][2]
 		# if color or number matches, return
 		if(hand_color == played_color || hand_number == played_number)
-			return(list(sel=hand[h], played=hand[h]))
+			return(list(selectedCard=hand[h], playedCard=hand[h]))
 		# if color wish card, randomly choose one color
 		if(hand_color == "rybg")
-			return(list(sel=hand[h], played=sample(c("red-rybg", "yellow-rybg", "blue-rybg", "green-rybg"),1)))
+			return(list(selectedCard=hand[h], playedCard=sample(c("red-rybg", "yellow-rybg", "blue-rybg", "green-rybg"),1)))
 	}	
 	# if there is no matching card in the hand, NO card can be played
-	return(list(sel="NO", played="NO"))
+	return(list(selectedCard="NO", playedCard="NO"))
 }
 
 

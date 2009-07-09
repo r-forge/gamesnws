@@ -10,8 +10,8 @@ createUnoGame <- function(wsName, ...)
 
 	# declate variables in nws
 	nwsDeclare(ws, 'players', 'fifo')
-	nwsDeclare(ws, 'played', 'lifo') #lifo
-	nwsDeclare(ws, 'cards', 'fifo') #fifo ??
+	nwsDeclare(ws, 'played', 'lifo') 
+	nwsDeclare(ws, 'cards', 'fifo')
 	nwsDeclare(ws, 'players_logedin', 'single')
 	nwsDeclare(ws, 'player_in_action', 'single')
 	nwsDeclare(ws, 'winner', 'single')
@@ -75,11 +75,8 @@ startUnoGame <- function(ws, cardsStart=7,
 		if(readCommand=="s" && nplayers>=minPlayers && nplayers<=maxPlayers){
 			# Start game	
 			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile)
-			#TODO, replay!
-			readCommand <- readline("End Game [e] or Replay [r]?")
-			if( readCommand == "r" ){
-				#TODO replay
-			}
+			cat("For replay you have to reset the Game: createUnoGame()\n")
+			readCommand <- readline("End Game [e]?")
 		} else if( ! (nplayers>=minPlayers) &&  readCommand=="s"){
 			cat("You need more than ", nplayers," player!\n")
 		} else if( ! (nplayers<=maxPlayers) &&  readCommand=="s"){
@@ -155,34 +152,6 @@ startUnoGame <- function(ws, cardsStart=7,
 	# TODO: calculate Points for winner
 	cat("Winner:", winner, "\n")
 	
-}
-
-#####################################
-# Funtion for running text-bar
-# waits for oparation in nws
-######################################
-.txtProgressBarNWS <- function(ws, variable, steps=10, width=20)
-{
-	# look for variable
-	tmp <- nwsFindTry(ws, variable)
-	# initialize txtProgressBar
-	pb <- txtProgressBar(min=0, max=steps, style=1, width=width)
-	i <- run <- 0
-	# if variable not available, run progress bar
-	while( is.null(tmp) ){
-		setTxtProgressBar(pb, i)
-		if(run==0) i <- i+1
-		else i <- i-1
-		if(i==steps) run<-1
-		if(i==0) run<-0
-		# look for variable
-		tmp <- nwsFindTry(ws, variable)
-		Sys.sleep(0.1) #to reduce requests to NWS
-	}
-	# close txtProgressBar
-	close(pb)
-
-	return( tmp )	
 }
 
 ###########################################
