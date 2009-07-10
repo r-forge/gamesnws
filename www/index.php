@@ -71,7 +71,8 @@ The rest is quite simple and will be explained during the game.
 
 <h2>ToDo's</h2>
 <ul>
-  <li>Finish first game: UNO</li>
+  <li>UNO: calculate Points for winner</li>
+  <li>UNO: improve logging for more statistcs</li>
   <li>Implement second game: POKER</li>
   <li>Write documentation</li>
   <li>Provide NWS-Game Server for everyone</li>
