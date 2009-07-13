@@ -11,7 +11,8 @@ playUno <- function(name,
 	ws <- netWorkSpace(name, ...)
 	
 	# set user to nws: log in
-	while ( is.null(players_logedin <- nwsFetchTry(ws, 'players_logedin')) ){}
+	while ( is.null(players_logedin <- nwsFetchTry(ws, 'players_logedin')) )
+	{ }# if players_logedin is empty, wait while other user is registering
 	if( any(players_logedin == user)){
 		nwsStore(ws, 'players_logedin', players_logedin)
 		stop("User already exists, please change user name!")
@@ -21,19 +22,19 @@ playUno <- function(name,
 	}else
 		nwsStore(ws, 'players_logedin', c(players_logedin, user))
 
-	# Wait for other players and game start
-	# if the player (=user) got cards, start the game
+	# Wait for other players
+	# if the player (=user) got cards, go to game start
 	# additional get cards for player (=user)
 	# and declare card-varable for user
 	nwsDeclare(ws, user, 'lifo')
 	cat("Wait for other players and game start:\n")
 	cards <- .txtProgressBarNWS(ws, user) 
  
-	# GAME
+	# GAME START
 	# play the game, as long as there is no winner
 	while(is.null(nwsFindTry(ws, "winner")) ){
 		# look for player in Action
-		# if you are user in action, there is no winner and there is card at the table,
+		# if you are user in action, there is no winner,
 		# than play your cards
 		pb <- txtProgressBar(min=0, max=10, style=1, width=20)
 		i <- run <- 0
@@ -50,23 +51,8 @@ playUno <- function(name,
 		playerInAction <- nwsFindTry(ws, 'player_in_action')
 		
 		# Check card stack for enough cards
-		tmp<-nwsListVars(ws, wsName=ws@wsName, showDataFrame=TRUE)
-		ncards <- tmp[tmp[,1]=="cards",]$"NumValues"
-		if( ncards < 5 ){
-			played <- nwsFetchTry(ws, 'played')
-			rest_played <- vector()
-			i=1
-			while( !is.null(tmp <- nwsFetchTry(ws,'played'))){
-				rest_played[i] <- tmp 
-				i <- i + 1
-			}
-			rest_played <- sample(rest_played)
-			for(i in 1:length(rest_played)){
-				nwsStore(ws, 'cards', rest_played[i])
-			}
-			nwsStore(ws, 'played', played)
-		}
-			
+		.check_card_stack(ws, "played", "cards")
+		
 		# SOME OUTPUT
 		# all players and there number of cards in the hand
 		players <- nwsFindTry(ws, "players_logedin")
@@ -76,9 +62,12 @@ playUno <- function(name,
 		cat("\n")
 		
 		#Play Card if there is no winner
+		# no card played and user in action
 		card_play <- ""
 		NO <- 0
-		while(card_play=="" && is.null(nwsFindTry(ws, "winner")) && playerInAction==user ){
+		while(card_play=="" && is.null(nwsFindTry(ws, "winner")) 
+				&& playerInAction==user )
+		{
 			
 			# SOME OUTPUT
 			# get played card
@@ -89,6 +78,7 @@ playUno <- function(name,
 			cat("Table:", played,"\n")
 			
 			# PENALTIE
+			# TODO change for reaction to penaltie cards
 			if( played_number =='2+'){
 				cat("You got 2 penalty cards\n")
 				cards <- c(cards, nwsFetchTry(ws,"cards"), nwsFetchTry(ws,"cards"))
@@ -126,7 +116,7 @@ playUno <- function(name,
 					card_play_save <- card_play
 			}	
 			
-			#ACTION DEPENDONG ON CARD TYPE
+			#ACTION DEPENDING ON CARD TYPE
 			#split for color and number
 			card_play_color <- strsplit(card_play_save, "-")[[1]][1]
 			card_play_number <- strsplit(card_play_save, "-")[[1]][2]
@@ -297,4 +287,24 @@ computerPlayerUNO <- function(hand, card_played)
 	return(list(selectedCard="NO", playedCard="NO"))
 }
 
-
+##################################################
+# Function to move played cards back to the stack
+################################################
+.check_card_stack <- function(ws, played, cards, number_cards=5)
+{		
+	tmp <- nwsListVars(ws, wsName=ws@wsName, showDataFrame=TRUE)
+	ncards <- tmp[tmp[,1]=="cards",]$"NumValues"
+	if( ncards < number_cards ){
+		last_played_card <- nwsFetchTry(ws, played)
+		rest_played <- vector()
+		i=1
+		while( !is.null(tmp <- nwsFetchTry(ws,played))){
+			rest_played[i] <- tmp 
+			i <- i + 1
+		}
+		rest_played <- sample(rest_played)
+		for(i in 1:length(rest_played))
+			nwsStore(ws, cards, rest_played[i])
+		nwsStore(ws, played, last_played_card)
+	}
+}
