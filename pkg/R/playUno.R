@@ -91,6 +91,7 @@ playUno <- function(name,
 				cards_hand <- c(cards_hand, nwsFetchTry(ws,"cards"), nwsFetchTry(ws,"cards"),nwsFetchTry(ws,"cards"), nwsFetchTry(ws,"cards"))
 				nwsStore(ws, user, cards)
 			}
+			cards_hand <- nwsFindTry(ws, user)
 			cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
 			
 			# PLAY CARD
@@ -180,6 +181,8 @@ computerPlayerUNO <- function(hand, card_played)
 	} else{
 		# for user
 		card_play <- readline("Play: ")
+		# TODO 
+		# check ob gültige karte
 		# ask for
 		if(card_play=="rybg-0"){
 			# ask for color by wish card
@@ -202,8 +205,12 @@ computerPlayerUNO <- function(hand, card_played)
 {
 	require(nws)
 	#split for color and number
-	card_play_color <- strsplit(card_play_save, "-")[[1]][1]
-	card_play_number <- strsplit(card_play_save, "-")[[1]][2]
+	tmp <- strsplit(card_play_save, "-")
+	card_play_color <- tmp[[1]][1]
+	if( is.na(tmp[[1]][2]) )
+		card_play_number <- ""
+	else
+		card_play_number <- tmp[[1]][2]
 	played_color <- strsplit(unlist(played), "-")[[1]][1]
 	played_number <- strsplit(unlist(played), "-")[[1]][2]
 	
@@ -341,5 +348,5 @@ computerPlayerUNO <- function(hand, card_played)
 	} else
 		warning("Error : unknown use case!")
 	
-	return(card_play, NO)
+	return(list(card_play, NO))
 }
