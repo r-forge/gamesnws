@@ -72,6 +72,10 @@ The rest is quite simple and will be explained during the game.
 <h2>ToDo's</h2>
 <ul>
   <li>UNO: calculate Points for winner</li>
+  <li>UNO: Show how many cards each player has</li>
+  <li>UNO: Player has to say "Uno" while playing the second to last card</li>
+  <li>UNO: The rybg-cards are not colorsensitve</li>
+  <li>UNO: Penalty for playing a wrong card</li>
   <li>UNO: improve logging for more statistcs</li>
   <li>Implement second game: POKER</li>
   <li>Write documentation</li>
