@@ -206,13 +206,20 @@ computerPlayerUNO <- function(hand, card_played)
 		# TODO 
 		# check ob gÃ¼ltige karte
 		# ask for
+		colbool<-FALSE
 		if(card_play=="rybg-0"){
+			while(!colbool){
 			# ask for color by wish card
-			col <- readline("Color: ")
+      col <- readline("Color: ")
+			colbool<-(.colcheck(col))
+			}
 			card_play_save <- paste(col, "rygb", sep="-")
 		}else if(card_play=="rybg-4+"){
+			while(!colbool){
 			# ask for color by wish card
-			col <- readline("Color: ")
+      col <- readline("Color: ")
+			colbool<-(.colcheck(col))
+			}
 			card_play_save <- paste(col, "rygb4+", sep="-")
 		}else
 			card_play_save <- card_play
@@ -245,8 +252,7 @@ computerPlayerUNO <- function(hand, card_played)
 		# if there is no matching card in the hand
 		if(NO==0){
 			# in first time get new card 
-			cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
-			nwsStore(ws, user, cards_hand) 
+			.getpenalty(ws,1,user,3) 			 
 			NO <- 1
 			card_play<-""
 			#no player rotation
@@ -256,208 +262,50 @@ computerPlayerUNO <- function(hand, card_played)
 			playerInAction <- nwsFetchTry(ws, 'players')
 			nwsStore(ws, 'players', playerInAction)
 			nwsStore(ws, 'player_in_action', playerInAction)
-			#card_play=NO
 		}
     	
-	}else if(card_play=="say-uno"){  #before playing second-last card
+	  }else if(card_play=="say-uno"){ 
     card_play<-""
     unovec[playerInAction]<-TRUE
         
-  }else if(card_play=="rybg-0"){# && played_color == card_play_color
-		#remove card from hand
-		cards_hand <- cards_hand[-which(cards_hand==card_play)]
-		nwsStore(ws, user, cards_hand)
-		# play card
-		nwsStore(ws, 'played', card_play_save)
-    if(length(cards_hand) == 1 && !unovec[playerInAction]){       
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
-    }	
-    else if(length(cards_hand) != 1 && unovec[playerInAction]){        
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
-    }
-    unovec[playerInAction]<-FALSE
-    
-		#check for winner and goto next player
-		if(length(cards_hand) != 0 ){
-			# rotate player
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-		} else
-			nwsStore(ws, 'winner', playerInAction)
+    }else if(card_play=="rybg-0"){
+		.removecard(ws,card_play, cards_hand,user)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+    		
+	  }else if(card_play=="rybg-4+" ){
+		.removecard(ws,card_play, cards_hand,user)
+		#penalty has not been given       
+		nwsStore(ws, 'penalty', FALSE)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
 		
-	}else if(card_play=="rybg-4+" ){#&& played_color == card_play_color){
-		#remove card from hand
-		cards_hand <- cards_hand[-which(cards_hand==card_play)]
-		nwsStore(ws, user, cards_hand)
-		# play card
-		nwsStore(ws, 'played', card_play_save)
-    if(length(cards_hand) == 1 && !unovec[playerInAction]){           
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
-    }	
-    else if(length(cards_hand) != 1 && unovec[playerInAction]){       
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
-    }
-    unovec[playerInAction]<-FALSE
-		#penalty has not been given
-    		nwsStore(ws, 'penalty', FALSE)
-		#check for winner and goto next player
-		if(length(cards_hand) != 0 ){
-			# rotate player
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-		} else
-			nwsStore(ws, 'winner', playerInAction)
+	  }else if(card_play_number == "BREAK" && (played_color == card_play_color || card_play_number == played_number)){
+		.removecard(ws,card_play, cards_hand,user)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+
+	  }else if(card_play_number=="BACK" && (played_color == card_play_color || card_play_number == played_number)){
+		.removecard(ws,card_play, cards_hand,user)
+		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)		
 		
-	}else if(card_play_number == "BREAK" && (played_color == card_play_color || card_play_number == played_number)){
-		#remove card from hand
-		cards_hand <- cards_hand[-which(cards_hand==card_play)]
-		nwsStore(ws, user, cards_hand)
-		# play card
-		nwsStore(ws, 'played', card_play_save)
-    if(length(cards_hand) == 1 && !unovec[playerInAction]){    
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
-    }	
-    else if(length(cards_hand) != 1 && unovec[playerInAction]){    
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
-    }
-    unovec[playerInAction]<-FALSE
-		#check for winner and goto next player
-		if(length(cards_hand) != 0 ){
-			# rotate player 2 times
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-		} else
-			nwsStore(ws, 'winner', playerInAction)
-		
-	}else if(card_play_number=="BACK" && (played_color == card_play_color || card_play_number == played_number)){
-		#remove card from hand
-		cards_hand <- cards_hand[-which(cards_hand==card_play)]
-		nwsStore(ws, user, cards_hand)
-		# play card
-		nwsStore(ws, 'played', card_play_save)
-    if(length(cards_hand) == 1 && !unovec[playerInAction]){    
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
-    }	
-    else if(length(cards_hand) != 1 && unovec[playerInAction]){    
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
-    }
-    unovec[playerInAction]<-FALSE 
-		#check for winner
-    		if(length(cards_hand) != 0 ){
-	    	#if there are only two players, they just don´t have to rotate
-     		 if(length(nwsFind(ws, 'players_logedin')) > 2){			
-      		#  rotate all players
-			players_tmp <- vector()
-			i=1
-			while( !is.null(tmp <- nwsFetchTry(ws,'players'))){
-				players_tmp[i] <- tmp 
-				i <- i + 1
-			}
-			for(i in (length(players_tmp)-1):1){
-				nwsStore(ws, 'players', players_tmp[i])
-			}
-			nwsStore(ws, 'players', players_tmp[length(players_tmp)])
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-			}
-		} else
-			nwsStore(ws, 'winner', playerInAction)
-		
-  	}else if(card_play_number=="2+" && card_play_number == played_number){
-		#remove card from hand
-		cards_hand <- cards_hand[-which(cards_hand==card_play)]
-		nwsStore(ws, user, cards_hand)
-		# play card
-		nwsStore(ws, 'played', card_play_save)
-    if(length(cards_hand) == 1 && !unovec[playerInAction]){   
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
-    }	
-    else if(length(cards_hand) != 1 && unovec[playerInAction]){    
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
-    }
-    unovec[playerInAction]<-FALSE  
-		#penalty has not been given
-    		nwsStore(ws, 'penalty', FALSE)
-		#check for winner and goto next player
-		if(length(cards_hand) != 0 ){
-			# rotate player
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-		} else
-			nwsStore(ws, 'winner', playerInAction)
-			
-	}else if(card_play_number=="2+" && played_color == card_play_color){
-		#remove card from hand
-		cards_hand <- cards_hand[-which(cards_hand==card_play)]
-		nwsStore(ws, user, cards_hand)
-		# play card
-		nwsStore(ws, 'played', card_play_save)
-    if(length(cards_hand) == 1 && !unovec[playerInAction]){   
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
-    }	
-    else if(length(cards_hand) != 1 && unovec[playerInAction]){    
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
-    }
-    unovec[playerInAction]<-FALSE  
-		#penalty has not been given
-    		nwsStore(ws, 'penalty', FALSE)
-		#check for winner and goto next player
-		if(length(cards_hand) != 0 ){
-			# rotate player
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-		} else
-			nwsStore(ws, 'winner', playerInAction)
-		
-	}else if(!(card_play %in% unlist(cards_hand))){
+ 	  }else if(card_play_number=="2+" && card_play_number == played_number){
+    .removecard(ws,card_play, cards_hand,user)
+    #penalty has not been given                
+    nwsStore(ws, 'penalty', FALSE) # play card 
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+                               			
+	 }else if(card_play_number=="2+" && played_color == card_play_color){
+		.removecard(ws,card_play, cards_hand,user)
+		#penalty has not been given        
+		nwsStore(ws, 'penalty', FALSE) # play card
+		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+
+	 }else if(!(card_play %in% unlist(cards_hand))){
 		cat("\tCard not in your cards!\n\t'NO' for new card.\n")
 		card_play <- ""
 		
-	}else if( (card_play_color == played_color) || (card_play_number == played_number) ) {
+	 }else if( (card_play_color == played_color) || (card_play_number == played_number) ) {
 		# play normal card with color and number
-		#remove card from hand
-		cards_hand <- cards_hand[-which(cards_hand==card_play)]
-		nwsStore(ws, user, cards_hand)
-		# play card
-		nwsStore(ws, 'played', card_play_save)
-		
-    if(length(cards_hand) == 1 && !unovec[playerInAction]){   
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
-    }	
-    else if(length(cards_hand) != 1 && unovec[playerInAction]){    
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
-    }
-    unovec[playerInAction]<-FALSE
-		#check for winner and goto next player
-		if(length(cards_hand) != 0 ){
-			# rotate player
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-		} else
-			nwsStore(ws, 'winner', playerInAction)
+		.removecard(ws,card_play, cards_hand,user)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
 		
 	}else if(played_color != card_play_color && played_number != card_play_number){
 		cat("\tCard does not match!\n")
@@ -500,9 +348,9 @@ computerPlayerUNO <- function(hand, card_played)
 		handsum<-handsum+(4*length(grep("4$",cards_hand))) 
 		handsum<-handsum+(5*length(grep("5",cards_hand)))
 		handsum<-handsum+(6*length(grep("6",cards_hand)))
-      		handsum<-handsum+(7*length(grep("7",cards_hand)))
-      		handsum<-handsum+(8*length(grep("8",cards_hand)))
-      		handsum<-handsum+(9*length(grep("9",cards_hand)))
+		handsum<-handsum+(7*length(grep("7",cards_hand)))
+		handsum<-handsum+(8*length(grep("8",cards_hand)))
+		handsum<-handsum+(9*length(grep("9",cards_hand)))
 		pointsvec[p]<-handsum
 	}
 	nwsStore(ws,'points',pointsvec)
@@ -518,6 +366,8 @@ computerPlayerUNO <- function(hand, card_played)
      reason<-", because you forgot to say \"uno\""
   }else if(reasonnumber==2){
      reason<-", because you said \"uno\" without having a reason"
+  }else if(reasonnumber==3){
+     reason<-", because you played no card"
   }
   cards_hand<-nwsFindTry(ws, playerInAction)
   for(i in 1:number){
@@ -526,3 +376,80 @@ computerPlayerUNO <- function(hand, card_played)
   cat("You got ",number," penalty card(s)",reason,"!\n")
   nwsStore(ws,playerInAction,cards_hand)
 }
+########################################################
+#Function to remove card from hand
+########################################################
+.removecard<-function(ws,card_play, cards_hand,user)
+{
+  require(nws)                                   
+ 	cards_hand <- cards_hand[-which(cards_hand==card_play)]    
+ 	nwsStore(ws, user, cards_hand)
+}                             
+#######################################################
+#(Play card, check for winner, go to next)-Function
+#######################################################
+.playcard<-function(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number) 
+{
+  require(nws)
+  # play card
+		nwsStore(ws, 'played', card_play_save)
+		
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){   
+    .getpenalty(ws,2,user,1)
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){    
+    .getpenalty(ws,2,user,2)
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE
+		#check for winner and goto next player
+		if(length(cards_hand) != 0 ){
+			# rotate player
+			if(card_play_number=="BREAK"){
+        # rotate player 2 times                         
+        playerInAction <- nwsFetchTry(ws, 'players')    
+        nwsStore(ws, 'players', playerInAction)         
+        playerInAction <- nwsFetchTry(ws, 'players')    
+        nwsStore(ws, 'players', playerInAction)         
+        nwsStore(ws, 'player_in_action', playerInAction)      
+      }
+			else if(card_play_number=="BACK"){
+  	   #if there are only two players, they just don´t have to rotate 
+   		   if(length(nwsFind(ws, 'players_logedin')) > 2){			         
+	        #  rotate all players                                        
+      	  players_tmp <- vector()                                          
+      	  i=1                                                              
+      	  while( !is.null(tmp <- nwsFetchTry(ws,'players'))){              
+      		  players_tmp[i] <- tmp                                          
+      		  i <- i + 1                                                     
+      	  }                                                                
+      	  for(i in (length(players_tmp)-1):1){                             
+      	 	  nwsStore(ws, 'players', players_tmp[i])                        
+      	  }                                                                
+    	    nwsStore(ws, 'players', players_tmp[length(players_tmp)])        
+       	  playerInAction <- nwsFetchTry(ws, 'players')                     
+          nwsStore(ws, 'players', playerInAction)                          
+      	  nwsStore(ws, 'player_in_action', playerInAction)                 
+      	  }                                                    
+       } 
+			 else{
+			 playerInAction <- nwsFetchTry(ws, 'players')
+			 nwsStore(ws, 'players', playerInAction)
+			 nwsStore(ws, 'player_in_action', playerInAction)
+			}    
+		} else
+			nwsStore(ws, 'winner', playerInAction)
+}        
+############################################################
+#Function to check if given color is a valid color
+############################################################
+.colcheck<-function(col)
+{
+  require(nws)
+  if(col == "blue" || col == "green" || col == "red" || col == "yellow"){
+    return (TRUE)
+  }else return (FALSE)
+}
+
+        
