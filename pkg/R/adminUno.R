@@ -18,7 +18,9 @@ createUnoGame <- function(wsName, ...)
 	nwsDeclare(ws, 'penalty', 'single')	#if one player got penalty but can not play a card, next player should not get penalty too
 	nwsDeclare(ws, 'debug' , 'single') 	# boolean for debug-mode
 	nwsDeclare(ws, 'points', 'single') 	# vector of points, in order of players_logedin
-	nwsDeclare(ws, 'uno' , 'single')  #vector of uno-booleans, in order of players_logedin 
+	nwsDeclare(ws, 'uno' , 'single')  #vector of uno-booleans, in order of players_logedin
+	nwsDeclare(ws, 'rules' , 'single') #vector of the rules 
+  nwsDeclare(ws, 'wildcardrule', 'single') #boolean if wildcards can be played as the uno-card 
 	
   # user declares own variable for his hand-cards in .playUnoMaster()
 
@@ -81,12 +83,14 @@ startUnoGame <- function(ws, cardsStart=7,
 
 		# Commands for actions depending on master-user Input
 		if(readCommand=="s" && nplayers>=minPlayers && nplayers<=maxPlayers){
-			# Start UNO game	
+		  .askForRules(ws)
+      # Start UNO game	
 			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile, debug)
 			cat("For replay you have to reset the Game: createUnoGame()\n")
 			readCommand <- readline("End Game [e]?")
-		} else if(readCommand=="d" && nplayers>=minPlayers && nplayers<=maxPlayers){
-			# Start UNO game	
+		}else if(readCommand=="d" && nplayers>=minPlayers && nplayers<=maxPlayers){
+      .askForRules(ws)
+      # Start UNO game	
 			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile, debug=TRUE)
 			cat("For replay you have to reset the Game: createUnoGame()\n")
 			readCommand <- readline("End Game [e]?")
@@ -154,7 +158,13 @@ startUnoGame <- function(ws, cardsStart=7,
 		first_card <- paste(first_card, "4+", sep="")
 	nwsStore(ws, 'played', first_card)
 	
-  	#Set startvalue for variable penalty
+  	#set startvalue for vector 'rules'
+  	#wc = wildcard ->Wildcards must not be played as uno-card
+  	#bb = blackblack ->rybg-cards must not lay on each other
+  	#pc = penalty concatenation ->penalties can be concatenated((2+)+(2+)=(4+)...)
+  	rules<-c(wc,bb,pc)
+    
+    #Set startvalue for variable penalty
   	#FALSE = penalty not allready given, TRUE = penalty has been given to a player -> not again!
  	 nwsStore(ws, 'penalty', TRUE)
  	 
@@ -236,4 +246,45 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
 		
 	#return winner
 	return(winner)
+}
+###############################################
+#Function to ask what rules should be used
+###############################################
+.askForRules<-function(ws)
+{
+  require(nws)
+  rules<-nwsFindTry(ws, 'rules')
+ 	readWCRule<-""
+  while(readWCRule != "y" && readWCRule != "n"){
+    readWCRule <- readline("Wildcards must not be played as uno-card[y],else[n]")
+    if(readWCRule=="y"){
+      wc<-TRUE
+    }
+    else if(readWCRule=="n"){
+      wc<-FALSE
+    }   
+  }
+  readBBRule<-""
+  while(readBBRule != "y" && readBBRule != "n"){
+    readBBRule <- readline("Wildcards must not be laid on other wild cards[y],else[n]")
+    if(readBBRule=="y"){
+      bb<-TRUE
+    }
+    else if(readBBRule=="n"){
+      bb<-FALSE
+    }   
+  }
+  readPCRule<-""
+  while(readPCRule != "y" && readPCRule != "n"){
+    readPCRule <- readline("Penalties could be concatenated[y],else[n]")
+    if(readPCRule=="y"){
+      pc<-TRUE
+    }
+    else if(readPCRule=="n"){
+      pc<-FALSE
+    }   
+  }
+  bools<-c(wc,bb,pc)
+  bools(rules)<-bools
+  nwsStore(ws,'rules',rules)
 }

@@ -270,33 +270,33 @@ computerPlayerUNO <- function(hand, card_played)
         
     }else if(card_play=="rybg-0"){
 		.removecard(ws,card_play, cards_hand,user)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
     		
 	  }else if(card_play=="rybg-4+" ){
 		.removecard(ws,card_play, cards_hand,user)
 		#penalty has not been given       
 		nwsStore(ws, 'penalty', FALSE)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
 		
 	  }else if(card_play_number == "BREAK" && (played_color == card_play_color || card_play_number == played_number)){
 		.removecard(ws,card_play, cards_hand,user)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
 
 	  }else if(card_play_number=="BACK" && (played_color == card_play_color || card_play_number == played_number)){
 		.removecard(ws,card_play, cards_hand,user)
-		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)		
+		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)		
 		
  	  }else if(card_play_number=="2+" && card_play_number == played_number){
     .removecard(ws,card_play, cards_hand,user)
     #penalty has not been given                
     nwsStore(ws, 'penalty', FALSE) # play card 
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
                                			
 	 }else if(card_play_number=="2+" && played_color == card_play_color){
 		.removecard(ws,card_play, cards_hand,user)
 		#penalty has not been given        
 		nwsStore(ws, 'penalty', FALSE) # play card
-		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
 
 	 }else if(!(card_play %in% unlist(cards_hand))){
 		cat("\tCard not in your cards!\n\t'NO' for new card.\n")
@@ -305,7 +305,7 @@ computerPlayerUNO <- function(hand, card_played)
 	 }else if( (card_play_color == played_color) || (card_play_number == played_number) ) {
 		# play normal card with color and number
 		.removecard(ws,card_play, cards_hand,user)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number)
+    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
 		
 	}else if(played_color != card_play_color && played_number != card_play_number){
 		cat("\tCard does not match!\n")
@@ -368,6 +368,8 @@ computerPlayerUNO <- function(hand, card_played)
      reason<-", because you said \"uno\" without having a reason"
   }else if(reasonnumber==3){
      reason<-", because you played no card"
+  }else if(reasonnumber==4){
+     reason<-", because you played a rybg-card as your last card" 
   }
   cards_hand<-nwsFindTry(ws, playerInAction)
   for(i in 1:number){
@@ -388,7 +390,7 @@ computerPlayerUNO <- function(hand, card_played)
 #######################################################
 #(Play card, check for winner, go to next)-Function
 #######################################################
-.playcard<-function(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number) 
+.playcard<-function(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play) 
 {
   require(nws)
   # play card
@@ -438,7 +440,9 @@ computerPlayerUNO <- function(hand, card_played)
 			 nwsStore(ws, 'players', playerInAction)
 			 nwsStore(ws, 'player_in_action', playerInAction)
 			}    
-		} else
+		} else if(length(cards_hand) == 0 && (card_play="rybg-0" ||card_play="rybg-4+")&& nwsFindTry(ws, 'wildcardrule')){
+      .getpenalty(ws,1,user,4)
+    }else
 			nwsStore(ws, 'winner', playerInAction)
 }        
 ############################################################
