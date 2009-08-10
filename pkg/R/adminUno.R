@@ -9,13 +9,17 @@ createUnoGame <- function(wsName, ...)
 	ws <- netWorkSpace(wsName, ...)
 
 	# declare variables in nws
-	nwsDeclare(ws, 'players', 'fifo') # list of players for player rotation
-	nwsDeclare(ws, 'played', 'lifo') # played card
-	nwsDeclare(ws, 'cards', 'fifo') # stack of cards
+	nwsDeclare(ws, 'players', 'fifo') 	# list of players for player rotation
+	nwsDeclare(ws, 'played', 'lifo') 	# played card
+	nwsDeclare(ws, 'cards', 'fifo') 	# stack of cards
 	nwsDeclare(ws, 'players_logedin', 'single') # vector of loged-in players
 	nwsDeclare(ws, 'player_in_action', 'single') # player in action
-	nwsDeclare(ws, 'winner', 'single') # name of winner
-	# user declares own variable for his hand-cards in .playUnoMaster()
+	nwsDeclare(ws, 'winner', 'single') 	# name of winner
+	nwsDeclare(ws, 'penalty', 'single')	#if one player got penalty but can not play a card, next player should not get penalty too
+	nwsDeclare(ws, 'debug' , 'single') 	# boolean for debug-mode
+	nwsDeclare(ws, 'points', 'single') 	# vector of points, in order of players_logedin
+	
+  # user declares own variable for his hand-cards in .playUnoMaster()
 
 	# initialize cards as described in wikipedia
 	# mix and store in nws
@@ -58,7 +62,7 @@ createUnoGame <- function(wsName, ...)
 ############################################################
 startUnoGame <- function(ws, cardsStart=7, 
 		minPlayers=2, maxPlayers=10, 
-		log=FALSE, logfile=NULL)
+		log=FALSE, logfile=NULL, debug=FALSE)
 {	
 	require(nws)
 
@@ -66,7 +70,7 @@ startUnoGame <- function(ws, cardsStart=7,
 	while(readCommand != "e"){
 
 		# Ask for command from master user
-		readCommand <- readline("Players online [o], Start Game [s], End Game [e]?")
+		readCommand <- readline("Players online [o], Start Game [s], End Game [e], Start Game in Debugmode [d]?")
 	
 		# get players (remove master, it is not a player!)
 		players <- nwsFindTry(ws, 'players_logedin')
@@ -77,7 +81,12 @@ startUnoGame <- function(ws, cardsStart=7,
 		# Commands for actions depending on master-user Input
 		if(readCommand=="s" && nplayers>=minPlayers && nplayers<=maxPlayers){
 			# Start UNO game	
-			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile)
+			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile, debug)
+			cat("For replay you have to reset the Game: createUnoGame()\n")
+			readCommand <- readline("End Game [e]?")
+		} else if(readCommand=="d" && nplayers>=minPlayers && nplayers<=maxPlayers){
+			# Start UNO game	
+			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile, debug=TRUE)
 			cat("For replay you have to reset the Game: createUnoGame()\n")
 			readCommand <- readline("End Game [e]?")
 		} else if( !(nplayers>=minPlayers) &&  readCommand=="s"){
@@ -86,7 +95,6 @@ startUnoGame <- function(ws, cardsStart=7,
 			cat("You can only play with less than ", nplayers," players!\n")
 		} else if(readCommand=="o") 
 			cat("Players:", players, "\n")
-		
 	}
 
 	# At the end close nws connection / delete game and nws Server
@@ -103,7 +111,7 @@ startUnoGame <- function(ws, cardsStart=7,
 # * monitor game
 ##############################################################
 .playUnoMaster <- function(ws, players, 
-		cardsStart, log=FALSE, logfile=NULL)
+		cardsStart, log=FALSE, logfile=NULL, debug)
 {
 	require(nws)
 
@@ -145,8 +153,22 @@ startUnoGame <- function(ws, cardsStart=7,
 		first_card <- paste(first_card, "4+", sep="")
 	nwsStore(ws, 'played', first_card)
 	
+  	#Set startvalue for variable penalty
+  	#FALSE = penalty not allready given, TRUE = penalty has been given to a player -> not again!
+ 	 nwsStore(ws, 'penalty', TRUE)
+	
 	# set player_in_action and start game
 	nwsStore(ws, 'player_in_action', players[length(players)])
+	
+	#Debug information
+	if(debug){
+		nwsStore(ws,'debug',TRUE)
+		cat("\tDebugmode is activated!\n")
+	} else{
+		nwsStore(ws,'debug',FALSE)
+		cat("\tDebugmode is not activated!\n")
+	}
+	
 
 	#Operation during running game
 	cat("\tGame is running:\n")
@@ -157,7 +179,6 @@ startUnoGame <- function(ws, cardsStart=7,
 	}
 
 	#Return winner
-	# TODO: calculate Points for winner
 	cat("Winner:", winner, "\n")
 	
 }
