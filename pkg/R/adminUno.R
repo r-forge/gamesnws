@@ -18,6 +18,7 @@ createUnoGame <- function(wsName, ...)
 	nwsDeclare(ws, 'penalty', 'single')	#if one player got penalty but can not play a card, next player should not get penalty too
 	nwsDeclare(ws, 'debug' , 'single') 	# boolean for debug-mode
 	nwsDeclare(ws, 'points', 'single') 	# vector of points, in order of players_logedin
+	nwsDeclare(ws, 'uno' , 'single')  #vector of uno-booleans, in order of players_logedin 
 	
   # user declares own variable for his hand-cards in .playUnoMaster()
 
@@ -156,7 +157,14 @@ startUnoGame <- function(ws, cardsStart=7,
   	#Set startvalue for variable penalty
   	#FALSE = penalty not allready given, TRUE = penalty has been given to a player -> not again!
  	 nwsStore(ws, 'penalty', TRUE)
-	
+ 	 
+ 	 #set startvalues for uno-vector
+ 	 uno<-vector()
+ 	 for(i in 1:length(nwsFindTry(ws, 'players_logedin', c(1:10)))){
+ 	 uno<-c(uno,FALSE)
+ 	 }
+ 	 nwsStore(ws, 'uno',uno)
+ 	 
 	# set player_in_action and start game
 	nwsStore(ws, 'player_in_action', players[length(players)])
 	

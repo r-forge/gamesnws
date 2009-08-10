@@ -87,7 +87,8 @@ playUno <- function(name,
 				#cat("	Handkarten:",cards_hand,"\n")
 				for(p in players){
 			  points <- nwsFindTry(ws,'points')
-		    cat("	>>",p, " - (",length(nwsFindTry(ws,p))," card(s), ",points[p]," point(s))<< ", sep="")
+			  uno<-nwsFindTry(ws,'uno')
+		    cat("	>>",p, " - (",length(nwsFindTry(ws,p))," card(s), ",points[p]," point(s), uno = ",uno[p],"<< ", sep="")
 		    }
 		    cat("\n")
 		  }
@@ -239,6 +240,9 @@ computerPlayerUNO <- function(hand, card_played)
 	
 	playerInAction <- user
 	
+	unovec<-nwsFindTry(ws, 'uno')
+	names(unovec)<- nwsFindTry(ws,'players_logedin')
+	
 	if(card_play=="NO"){
 		# if there is no matching card in the hand
 		if(NO==0){
@@ -256,13 +260,30 @@ computerPlayerUNO <- function(hand, card_played)
 			nwsStore(ws, 'player_in_action', playerInAction)
 			#card_play=NO
 		}
-		
-	}else if(card_play=="rybg-0"){# && played_color == card_play_color){
+    	
+	}else if(card_play=="say-uno"){  #before playing second-last card
+    card_play<-""
+    unovec[playerInAction]<-TRUE
+        
+  }else if(card_play=="rybg-0"){# && played_color == card_play_color
 		#remove card from hand
 		cards_hand <- cards_hand[-which(cards_hand==card_play)]
 		nwsStore(ws, user, cards_hand)
 		# play card
 		nwsStore(ws, 'played', card_play_save)
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){
+    cat("2 penalty-cards, because you forgot to say \"uno\"!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){
+    cat("1 penalty-card, because you said \"uno\" without having a reason!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE
+    
 		#check for winner and goto next player
 		if(length(cards_hand) != 0 ){
 			# rotate player
@@ -278,6 +299,18 @@ computerPlayerUNO <- function(hand, card_played)
 		nwsStore(ws, user, cards_hand)
 		# play card
 		nwsStore(ws, 'played', card_play_save)
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){
+    cat("2 penalty-cards, because you forgot to say \"uno\"!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){
+    cat("1 penalty-card, because you said \"uno\" without having a reason!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE
 		#penalty has not been given
     		nwsStore(ws, 'penalty', FALSE)
 		#check for winner and goto next player
@@ -295,6 +328,18 @@ computerPlayerUNO <- function(hand, card_played)
 		nwsStore(ws, user, cards_hand)
 		# play card
 		nwsStore(ws, 'played', card_play_save)
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){
+    cat("2 penalty-cards, because you forgot to say \"uno\"!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){
+    cat("1 penalty-card, because you said \"uno\" without having a reason!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE
 		#check for winner and goto next player
 		if(length(cards_hand) != 0 ){
 			# rotate player 2 times
@@ -311,7 +356,19 @@ computerPlayerUNO <- function(hand, card_played)
 		cards_hand <- cards_hand[-which(cards_hand==card_play)]
 		nwsStore(ws, user, cards_hand)
 		# play card
-		nwsStore(ws, 'played', card_play_save) 
+		nwsStore(ws, 'played', card_play_save)
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){
+    cat("2 penalty-cards, because you forgot to say \"uno\"!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){
+    cat("1 penalty-card, because you said \"uno\" without having a reason!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE 
 		#check for winner
     		if(length(cards_hand) != 0 ){
 	    	#if there are only two players, they just don´t have to rotate
@@ -339,7 +396,19 @@ computerPlayerUNO <- function(hand, card_played)
 		cards_hand <- cards_hand[-which(cards_hand==card_play)]
 		nwsStore(ws, user, cards_hand)
 		# play card
-		nwsStore(ws, 'played', card_play_save)  
+		nwsStore(ws, 'played', card_play_save)
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){
+    cat("2 penalty-cards, because you forgot to say \"uno\"!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){
+    cat("1 penalty-card, because you said \"uno\" without having a reason!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE  
 		#penalty has not been given
     		nwsStore(ws, 'penalty', FALSE)
 		#check for winner and goto next player
@@ -356,7 +425,19 @@ computerPlayerUNO <- function(hand, card_played)
 		cards_hand <- cards_hand[-which(cards_hand==card_play)]
 		nwsStore(ws, user, cards_hand)
 		# play card
-		nwsStore(ws, 'played', card_play_save)  
+		nwsStore(ws, 'played', card_play_save)
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){
+    cat("2 penalty-cards, because you forgot to say \"uno\"!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){
+    cat("1 penalty-card, because you said \"uno\" without having a reason!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE  
 		#penalty has not been given
     		nwsStore(ws, 'penalty', FALSE)
 		#check for winner and goto next player
@@ -379,6 +460,19 @@ computerPlayerUNO <- function(hand, card_played)
 		nwsStore(ws, user, cards_hand)
 		# play card
 		nwsStore(ws, 'played', card_play_save)
+		
+    if(length(cards_hand) == 1 && !unovec[playerInAction]){
+    cat("2 penalty-cards, because you forgot to say \"uno\"!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)
+    }	
+    else if(length(cards_hand) != 1 && unovec[playerInAction]){
+    cat("1 penalty-card, because you said \"uno\" without having a reason!\n")
+    cards_hand <- c(cards_hand, nwsFetchTry(ws,'cards'))
+	  nwsStore(ws, user, cards_hand)    
+    }
+    unovec[playerInAction]<-FALSE
 		#check for winner and goto next player
 		if(length(cards_hand) != 0 ){
 			# rotate player
@@ -394,6 +488,8 @@ computerPlayerUNO <- function(hand, card_played)
 
 	} else
 		warning("Error : unknown use case!")
+
+  nwsStore(ws, 'uno',unovec)
 	return(list(card_play, NO))
 }
 ##################################################
@@ -414,6 +510,7 @@ computerPlayerUNO <- function(hand, card_played)
 		pointsvec<-tmp
 	}
 	names(pointsvec)<-nwsFindTry(ws,'players_logedin')
+	
 	for(p in nwsFindTry(ws,'players_logedin')){
 	#Summarize Handcards
 		cards_hand<-nwsFindTry(ws,p)
