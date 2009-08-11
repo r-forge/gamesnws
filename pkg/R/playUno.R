@@ -37,15 +37,21 @@ playUno <- function(name,
 		# look for player in Action
 		# if you are user in action, there is no winner,
 		# than play your cards
-		pb <- txtProgressBar(min=0, max=10, style=1, width=20)
-		i <- run <- 0
+		players<-nwsFindTry(ws,'players_logedin')
+		string<-""
+    for(p in players){
+      string<-c(string,p)
+    }
+		pb <- txtProgressBar(min=0, max=10, style=1, width=10)
+		i <- 1
+    run <- 0
 		while( nwsFindTry(ws, 'player_in_action')!=user && is.null(nwsFindTry(ws, 'winner')) ){
 			setTxtProgressBar(pb, i)
 			if(run==0)
 				i <- i+1
 			else i <- i-1
 			if(i==10) run<-1
-			if(i==0) run<-0
+			if(i==1) run<-0
 			Sys.sleep(0.1) #to reduce requests to NWS
 		}
 		close(pb)
@@ -104,14 +110,46 @@ playUno <- function(name,
 			
 			# PENALTY
 			# TODO change for reaction to penalty cards
-			if( played_number =='2+'&& nwsFind(ws, 'penalty') == FALSE){
-				.getpenalty(ws,2,user,0)
-  		  nwsStore(ws, 'penalty', TRUE) 
+			if( played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
+				rulesbools<-nwsFindTry(ws, 'rulesbools')
+        if(rulesbools[3]){
+          readPC<-""
+          while(readPC != "y" && readPC != "n"){
+           readPC <- readline("Do you want to concatenate penalty?[y/n]")
+            if(readPC=="y"){
+              pc<-TRUE
+            }
+            else if(readPC=="n"){
+              pc<-FALSE
+            }   
+           }
+         }
+        if(!pc || !rulesbools[3]){
+  		  pen<-nwsFetchTry(ws, 'penalty')
+        .getpenalty(ws,pen,user,0)
+        nwsStore(ws, 'penalty', 0)
+        }       
 			}
 
-			if( played_number =='rybg4+' && nwsFindTry(ws, 'penalty') == FALSE){
-				.getpenalty(ws,4,user,0)
-				nwsStore(ws, 'penalty', TRUE)
+			if( played_number =='rybg4+' && nwsFindTry(ws, 'penalty') != 0){
+				rulesbools<-nwsFindTry(ws, 'rulesbools')
+        if(rulesbools[3]){
+          readPC<-""
+          while(readPC != "y" && readPC != "n"){
+           readPC <- readline("Do you want to concatenate penalty?[y/n]")
+            if(readPC=="y"){
+              pc<-TRUE
+            }
+            else if(readPC=="n"){
+              pc<-FALSE
+            }   
+           }
+         }
+        if(!pc || !rulesbools[3]){
+  		  pen<-nwsFetchTry(ws, 'penalty')
+        .getpenalty(ws,pen,user,0)
+        nwsStore(ws, 'penalty', 0)
+        }       
 			}
 			cards_hand <- nwsFindTry(ws, user)
 			cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
@@ -288,7 +326,9 @@ computerPlayerUNO <- function(hand, card_played)
      # play rybg-4+ card
     .removecard(ws,card_play, cards_hand,user)
 		#penalty has not been given       
-		nwsStore(ws, 'penalty', FALSE)
+		pen<-nwsFetchTry(ws, 'penalty')
+		pen<-pen+4
+    nwsStore(ws, 'penalty', pen)
     .playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
     }
     else if(card_play=="rybg-4+" && played_number=="rybg" && rulesbools[2]){
@@ -308,14 +348,18 @@ computerPlayerUNO <- function(hand, card_played)
     # play a 2+ card on another one
     .removecard(ws,card_play, cards_hand,user)
     #penalty has not been given                
-    nwsStore(ws, 'penalty', FALSE)  
+		pen<-nwsFetchTry(ws, 'penalty')
+		pen<-pen+2
+    nwsStore(ws, 'penalty', pen)  
     .playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
 	 }
    else if(card_play_number=="2+" && played_color == card_play_color){
 		# play a 2+ card on a card with the same color
     .removecard(ws,card_play, cards_hand,user)
 		#penalty has not been given        
-		nwsStore(ws, 'penalty', FALSE)
+		pen<-nwsFetchTry(ws, 'penalty')
+		pen<-pen+2
+    nwsStore(ws, 'penalty', pen)
 		.playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
 	 }
    else if( (card_play_color == played_color) || (card_play_number == played_number) ) {
@@ -403,9 +447,15 @@ computerPlayerUNO <- function(hand, card_played)
 ########################################################
 .removecard<-function(ws,card_play, cards_hand,user)
 {
-  require(nws)                                   
- 	cards_hand <- cards_hand[-which(cards_hand==card_play)]    
- 	nwsStore(ws, user, cards_hand)
+  require(nws)
+  rulesbools<-nwsFindTry(ws, 'rulesbools')
+  len<-length(cards_hand)
+  cards_hand <- cards_hand[-which(cards_hand==card_play)]
+  dif<-len-length(cards_hand)
+  if(dif > 1 && !rulesbools[4]){                                   
+ 	  cards_hand<-c(cards_hand,card_play)  
+ 	}
+ 	nwsStore(ws,user,cards_hand)
 }                             
 #######################################################
 #(Play card, check for winner, go to next)-Function

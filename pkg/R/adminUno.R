@@ -159,12 +159,12 @@ startUnoGame <- function(ws, cardsStart=7,
 	nwsStore(ws, 'played', first_card)
       
     #set values of rulesvector
-    rules<-c("wc","bb","pc")
+    rules<-c("wc","bb","pc","dc")
     nwsStore(ws, 'rules', rules)
     
     #Set startvalue for variable penalty
   	#FALSE = penalty not allready given, TRUE = penalty has been given to a player -> not again!
- 	 nwsStore(ws, 'penalty', TRUE)
+ 	 nwsStore(ws, 'penalty', 0)
  	 
  	 #set startvalues for uno-vector
  	 uno<-vector()
@@ -282,6 +282,16 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
       pc<-FALSE
     }   
   }
-  rulesbools<-c(wc,bb,pc)
+  readDCRule<-""
+  while(readDCRule != "y" && readDCRule != "n"){
+    readDCRule <- readline("Cards, you have twice can be played as one[y],else[n]")
+    if(readDCRule=="y"){
+      dc<-TRUE
+    }
+    else if(readDCRule=="n"){
+      dc<-FALSE
+    }   
+  }
+  rulesbools<-c(wc,bb,pc,dc)
   nwsStore(ws,'rulesbools',rulesbools)
 }
