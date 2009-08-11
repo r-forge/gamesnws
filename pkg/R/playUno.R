@@ -84,7 +84,7 @@ playUno <- function(name,
 				cat("	Players in Game: ",length(nwsFindTry(ws,'players_logedin')),"\n")
 				cat("	Active Player: ",nwsFindTry(ws,'player_in_action'),"\n")
 				cat("	Status of penalty-var: ",nwsFindTry(ws,'penalty'),"\n")
-				#cat("	Handkarten:",cards_hand,"\n")
+				cat("	Said Uno:",nwsFindTry(ws, 'uno'),"\n")
 				for(p in players){
 			  points <- nwsFindTry(ws,'points')
 			  uno<-nwsFindTry(ws,'uno')
@@ -104,13 +104,11 @@ playUno <- function(name,
 			# TODO change for reaction to penalty cards
 			if( played_number =='2+'&& nwsFind(ws, 'penalty') == FALSE){
 				.getpenalty(ws,2,user,0)
-				nwsStore(ws, user, cards_hand)
-        		nwsStore(ws, 'penalty', TRUE) 
+  		  nwsStore(ws, 'penalty', TRUE) 
 			}
 
-			if( played_number =='rygb4+' && nwsFindTry(ws, 'penalty') == FALSE){
+			if( played_number =='rybg4+' && nwsFindTry(ws, 'penalty') == FALSE){
 				.getpenalty(ws,4,user,0)
-        nwsStore(ws, user, cards_hand)
 				nwsStore(ws, 'penalty', TRUE)
 			}
 			cards_hand <- nwsFindTry(ws, user)
@@ -203,9 +201,6 @@ computerPlayerUNO <- function(hand, card_played)
 	} else{
 		# for user
 		card_play <- readline("Play: ")
-		# TODO 
-		# check ob gÃ¼ltige karte
-		# ask for
 		colbool<-FALSE
 		if(card_play=="rybg-0"){
 			while(!colbool){
@@ -213,14 +208,14 @@ computerPlayerUNO <- function(hand, card_played)
       col <- readline("Color: ")
 			colbool<-(.colcheck(col))
 			}
-			card_play_save <- paste(col, "rygb", sep="-")
+			card_play_save <- paste(col, "rybg", sep="-")
 		}else if(card_play=="rybg-4+"){
 			while(!colbool){
 			# ask for color by wish card
       col <- readline("Color: ")
 			colbool<-(.colcheck(col))
 			}
-			card_play_save <- paste(col, "rygb4+", sep="-")
+			card_play_save <- paste(col, "rybg4+", sep="-")
 		}else
 			card_play_save <- card_play
 	}
@@ -242,80 +237,93 @@ computerPlayerUNO <- function(hand, card_played)
 		card_play_number <- tmp[[1]][2]
 	played_color <- strsplit(unlist(played), "-")[[1]][1]
 	played_number <- strsplit(unlist(played), "-")[[1]][2]
-	
+	rulesbools<-nwsFindTry(ws, 'rulesbools')
 	playerInAction <- user
 	
-	unovec<-nwsFindTry(ws, 'uno')
+	unovec<-nwsFindTry(ws, 'uno')                                
 	names(unovec)<- nwsFindTry(ws,'players_logedin')
 	
-	if(card_play=="NO"){
-		# if there is no matching card in the hand
-		if(NO==0){
-			# in first time get new card 
-			.getpenalty(ws,1,user,3) 			 
-			NO <- 1
-			card_play<-""
-			#no player rotation
-		} else if(NO==1){
-			# in second time, do not get new card
-			# rotate player
-			playerInAction <- nwsFetchTry(ws, 'players')
-			nwsStore(ws, 'players', playerInAction)
-			nwsStore(ws, 'player_in_action', playerInAction)
-		}
-    	
-	  }else if(card_play=="say-uno"){ 
+	 if(card_play=="NO"){
+	   # if there is no matching card in the hand
+		  if(NO==0){
+			   # in first time get new card 
+			   .getpenalty(ws,1,user,3) 			 
+			   NO <- 1
+			   card_play<-""
+			   #no player rotation
+		  } else if(NO==1){
+			   # in second time, do not get new card
+			   .rotate(ws,1)
+		  }
+	  }
+    else if(card_play=="say-uno"){ 
+	  # announce that you play your second-last card
     card_play<-""
     unovec[playerInAction]<-TRUE
-        
-    }else if(card_play=="rybg-0"){
-		.removecard(ws,card_play, cards_hand,user)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
-    		
-	  }else if(card_play=="rybg-4+" ){
-		.removecard(ws,card_play, cards_hand,user)
-		#penalty has not been given       
-		nwsStore(ws, 'penalty', FALSE)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
-		
-	  }else if(card_play_number == "BREAK" && (played_color == card_play_color || card_play_number == played_number)){
-		.removecard(ws,card_play, cards_hand,user)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
-
-	  }else if(card_play_number=="BACK" && (played_color == card_play_color || card_play_number == played_number)){
-		.removecard(ws,card_play, cards_hand,user)
-		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)		
-		
- 	  }else if(card_play_number=="2+" && card_play_number == played_number){
-    .removecard(ws,card_play, cards_hand,user)
-    #penalty has not been given                
-    nwsStore(ws, 'penalty', FALSE) # play card 
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
-                               			
-	 }else if(card_play_number=="2+" && played_color == card_play_color){
-		.removecard(ws,card_play, cards_hand,user)
-		#penalty has not been given        
-		nwsStore(ws, 'penalty', FALSE) # play card
-		.playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
-
-	 }else if(!(card_play %in% unlist(cards_hand))){
+    nwsStore(ws, 'uno',unovec)
+    }else if(!(card_play %in% unlist(cards_hand))){
+    # play a card, that is not in your hand or typing error
 		cat("\tCard not in your cards!\n\t'NO' for new card.\n")
 		card_play <- ""
-		
-	 }else if( (card_play_color == played_color) || (card_play_number == played_number) ) {
-		# play normal card with color and number
+	  }
+    else if((card_play=="rybg-0") && (played_number!="rybg" || !rulesbools[2])){
+     # play rybg-0 card
+    .removecard(ws,card_play, cards_hand,user)
+    .playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
+    }
+    else if(card_play=="rybg-0" && played_number=="rybg" &&  rulesbools[2]){
+     # play rybg-0 card on another rybg-card    
+      .getpenalty(ws,1,user,5)
+      card_play<-""		
+    }
+    else if(card_play=="rybg-4+" && (played_number!="rybg" || !rulesbools[2])){
+     # play rybg-4+ card
+    .removecard(ws,card_play, cards_hand,user)
+		#penalty has not been given       
+		nwsStore(ws, 'penalty', FALSE)
+    .playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
+    }
+    else if(card_play=="rybg-4+" && played_number=="rybg" && rulesbools[2]){
+     # play rybg-4+ card on another rybg-card
+      .getpenalty(ws,1,user,5)
+      card_play<-""	
+    }
+    else if(card_play_number == "BREAK" && (played_color == card_play_color || card_play_number == played_number)){
 		.removecard(ws,card_play, cards_hand,user)
-    .playcard(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play)
-		
-	}else if(played_color != card_play_color && played_number != card_play_number){
-		cat("\tCard does not match!\n")
+    .playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
+	  }
+    else if(card_play_number=="BACK" && (played_color == card_play_color || card_play_number == played_number)){
+		.removecard(ws,card_play, cards_hand,user)
+		.playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)		
+ 	  }
+     else if(card_play_number=="2+" && card_play_number == played_number){
+    # play a 2+ card on another one
+    .removecard(ws,card_play, cards_hand,user)
+    #penalty has not been given                
+    nwsStore(ws, 'penalty', FALSE)  
+    .playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
+	 }
+   else if(card_play_number=="2+" && played_color == card_play_color){
+		# play a 2+ card on a card with the same color
+    .removecard(ws,card_play, cards_hand,user)
+		#penalty has not been given        
+		nwsStore(ws, 'penalty', FALSE)
+		.playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)
+	 }
+   else if( (card_play_color == played_color) || (card_play_number == played_number) ) {
+		# play normal card with color and number
+		  .removecard(ws,card_play, cards_hand,user)
+      .playcard(ws, card_play_save, playerInAction,unovec,card_play_number,card_play)	
+	 }
+   else if(played_color != card_play_color && played_number != card_play_number){
+		# play a wrong card
+    .getpenalty(ws,2,user,6)
 		card_play <- ""
-
-	} else
-		warning("Error : unknown use case!")
-
-  nwsStore(ws, 'uno',unovec)
-	return(list(card_play, NO))
+		.rotate(ws,1)
+	 }
+   else
+	 warning("Error : unknown use case!") 
+	 return(list(card_play, NO))
 }
 ##################################################
 # Function to summarize the points of the handcards
@@ -370,6 +378,10 @@ computerPlayerUNO <- function(hand, card_played)
      reason<-", because you played no card"
   }else if(reasonnumber==4){
      reason<-", because you played a rybg-card as your last card" 
+  }else if(reasonnumber==5){
+     reason<-", because you laid a rybg-card on another one" 
+  }else if(reasonnumber==6){
+     reason<-", because you played a wrong card" 
   }
   cards_hand<-nwsFindTry(ws, playerInAction)
   for(i in 1:number){
@@ -390,36 +402,32 @@ computerPlayerUNO <- function(hand, card_played)
 #######################################################
 #(Play card, check for winner, go to next)-Function
 #######################################################
-.playcard<-function(ws, card_play_save, cards_hand, playerInAction,user,unovec,card_play_number,card_play) 
+.playcard<-function(ws, card_play_save, playerInAction,unovec,card_play_number,card_play) 
 {
   require(nws)
   # play card
 		nwsStore(ws, 'played', card_play_save)
+		cards_hand<-nwsFindTry(ws, playerInAction)
+		rulesbools<-nwsFindTry(ws, 'rulesbools')
 		
     if(length(cards_hand) == 1 && !unovec[playerInAction]){   
-    .getpenalty(ws,2,user,1)
-	  nwsStore(ws, user, cards_hand)
+    .getpenalty(ws,2,playerInAction,1) 	  
     }	
     else if(length(cards_hand) != 1 && unovec[playerInAction]){    
-    .getpenalty(ws,2,user,2)
-	  nwsStore(ws, user, cards_hand)    
+    .getpenalty(ws,2,playerInAction,2)    
     }
     unovec[playerInAction]<-FALSE
+    nwsStore(ws,'uno',unovec)
 		#check for winner and goto next player
 		if(length(cards_hand) != 0 ){
 			# rotate player
-			if(card_play_number=="BREAK"){
-        # rotate player 2 times                         
-        playerInAction <- nwsFetchTry(ws, 'players')    
-        nwsStore(ws, 'players', playerInAction)         
-        playerInAction <- nwsFetchTry(ws, 'players')    
-        nwsStore(ws, 'players', playerInAction)         
-        nwsStore(ws, 'player_in_action', playerInAction)      
+			if(card_play_number=="BREAK"){                        
+        .rotate(ws,2)      
       }
 			else if(card_play_number=="BACK"){
   	   #if there are only two players, they just don´t have to rotate 
    		   if(length(nwsFind(ws, 'players_logedin')) > 2){			         
-	        #  rotate all players                                        
+	        #  reverse playorder                                        
       	  players_tmp <- vector()                                          
       	  i=1                                                              
       	  while( !is.null(tmp <- nwsFetchTry(ws,'players'))){              
@@ -436,12 +444,10 @@ computerPlayerUNO <- function(hand, card_played)
       	  }                                                    
        } 
 			 else{
-			 playerInAction <- nwsFetchTry(ws, 'players')
-			 nwsStore(ws, 'players', playerInAction)
-			 nwsStore(ws, 'player_in_action', playerInAction)
+			 .rotate(ws,1)
 			}    
-		} else if(length(cards_hand) == 0 && (card_play="rybg-0" ||card_play="rybg-4+")&& nwsFindTry(ws, 'wildcardrule')){
-      .getpenalty(ws,1,user,4)
+		} else if(length(cards_hand) == 0 && (card_play=="rybg-0" || card_play=="rybg-4+")&& rulesbools[1]){
+      .getpenalty(ws,1,playerInAction,4)
     }else
 			nwsStore(ws, 'winner', playerInAction)
 }        
@@ -454,6 +460,18 @@ computerPlayerUNO <- function(hand, card_played)
   if(col == "blue" || col == "green" || col == "red" || col == "yellow"){
     return (TRUE)
   }else return (FALSE)
+}
+###########################################################
+#Function for player-rotation
+###########################################################
+.rotate<-function(ws,numberOfRots)
+{
+  require(nws)
+  for(i in 1:numberOfRots){
+	     playerInAction <- nwsFetchTry(ws, 'players')
+			 nwsStore(ws, 'players', playerInAction)
+	}		 
+			 nwsStore(ws, 'player_in_action', playerInAction)
 }
 
         

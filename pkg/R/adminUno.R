@@ -19,8 +19,8 @@ createUnoGame <- function(wsName, ...)
 	nwsDeclare(ws, 'debug' , 'single') 	# boolean for debug-mode
 	nwsDeclare(ws, 'points', 'single') 	# vector of points, in order of players_logedin
 	nwsDeclare(ws, 'uno' , 'single')  #vector of uno-booleans, in order of players_logedin
-	nwsDeclare(ws, 'rules' , 'single') #vector of the rules 
-  nwsDeclare(ws, 'wildcardrule', 'single') #boolean if wildcards can be played as the uno-card 
+	nwsDeclare(ws, 'rules' , 'single') #vector of the rules
+  nwsDeclare(ws, 'rulesbools', 'single')#vector of booleanvalues in order of rules 
 	
   # user declares own variable for his hand-cards in .playUnoMaster()
 
@@ -157,12 +157,10 @@ startUnoGame <- function(ws, cardsStart=7,
 	if( first_card_number == "4+")
 		first_card <- paste(first_card, "4+", sep="")
 	nwsStore(ws, 'played', first_card)
-	
-  	#set startvalue for vector 'rules'
-  	#wc = wildcard ->Wildcards must not be played as uno-card
-  	#bb = blackblack ->rybg-cards must not lay on each other
-  	#pc = penalty concatenation ->penalties can be concatenated((2+)+(2+)=(4+)...)
-  	rules<-c(wc,bb,pc)
+      
+    #set values of rulesvector
+    rules<-c("wc","bb","pc")
+    nwsStore(ws, 'rules', rules)
     
     #Set startvalue for variable penalty
   	#FALSE = penalty not allready given, TRUE = penalty has been given to a player -> not again!
@@ -284,7 +282,6 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
       pc<-FALSE
     }   
   }
-  bools<-c(wc,bb,pc)
-  bools(rules)<-bools
-  nwsStore(ws,'rules',rules)
+  rulesbools<-c(wc,bb,pc)
+  nwsStore(ws,'rulesbools',rulesbools)
 }
