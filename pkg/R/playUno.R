@@ -85,10 +85,12 @@ playUno <- function(name,
 				cat("	Active Player: ",nwsFindTry(ws,'player_in_action'),"\n")
 				cat("	Status of penalty-var: ",nwsFindTry(ws,'penalty'),"\n")
 				cat("	Said Uno:",nwsFindTry(ws, 'uno'),"\n")
+				cat("	Rules:",nwsFindTry(ws, 'rules'),"\n")
+				cat("	Rulesbools:",nwsFindTry(ws, 'rulesbools'),"\n")
 				for(p in players){
 			  points <- nwsFindTry(ws,'points')
 			  uno<-nwsFindTry(ws,'uno')
-		    cat("	>>",p, " - (",length(nwsFindTry(ws,p))," card(s), ",points[p]," point(s), uno = ",uno[p],"<< ", sep="")
+		    cat("(",p, " - (",length(nwsFindTry(ws,p))," card(s), ",points[p]," point(s), uno = ",uno[p],") ", sep="")
 		    }
 		    cat("\n")
 		  }
@@ -261,7 +263,13 @@ computerPlayerUNO <- function(hand, card_played)
     card_play<-""
     unovec[playerInAction]<-TRUE
     nwsStore(ws, 'uno',unovec)
-    }else if(!(card_play %in% unlist(cards_hand))){
+    }
+    else if(card_play=="get-info"){ 
+	  # get gameinformation
+    card_play<-""
+    .getInfo(ws)
+    }
+    else if(!(card_play %in% unlist(cards_hand))){
     # play a card, that is not in your hand or typing error
 		cat("\tCard not in your cards!\n\t'NO' for new card.\n")
 		card_play <- ""
@@ -473,5 +481,35 @@ computerPlayerUNO <- function(hand, card_played)
 	}		 
 			 nwsStore(ws, 'player_in_action', playerInAction)
 }
-
-        
+##########################################################
+#Function for getting Information about the game
+##########################################################
+.getInfo<-function(ws)
+{
+  require(ws)
+  maxi<- -Inf
+  mini<- Inf
+  sumi<- 0
+  counter<- 0
+  players<-nwsFindTry(ws,'players_logedin')
+  for(p in players){
+      len<-length(nwsFindTry(ws,p))
+      cat("len",len,"\n")
+     if(len > maxi){
+     maxi <- len
+     }
+     if(len < mini){
+     mini <- len
+     }
+     sumi <- sumi + len 
+     counter<- counter+1   
+  }
+  cat("\nGame Information:")
+  cat("\n Rules",nwsFindTry(ws,'rules'))
+  cat("\n      ",nwsFindTry(ws,'rulesbools'))
+  cat("\n Cards in Deck: 102")
+  cat("\n Players in Game: ",counter)
+  cat("\n Max Cards:",maxi)
+  cat("\n Min Cards: ",mini)
+  cat("\n Average Cards: ",sumi/counter,"\n")
+}        
