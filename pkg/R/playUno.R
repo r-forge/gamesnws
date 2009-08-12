@@ -112,7 +112,8 @@ playUno <- function(name,
 			cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
 			
 			# PENALTY
-			if( played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
+			if(computerPlayer == FALSE){ # CPChange 
+      if( played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
 				rulesbools<-nwsFindTry(ws, 'rulesbools')
         if(rulesbools[3]){
           readPC<-""
@@ -147,7 +148,7 @@ playUno <- function(name,
               pc<-FALSE
             }   
            }
-         }
+         } 
         if(!pc || !rulesbools[3]){
   		  pen<-nwsFetchTry(ws, 'penalty')
         .getpenalty(ws,pen,user,0)
@@ -155,10 +156,11 @@ playUno <- function(name,
         cards_hand <- nwsFindTry(ws, user)
         }       
 			}
+			}
 			
 			
 			# PLAY CARD
-			tmp <- .playUnoCard(cards_hand, played, 
+			tmp <- .playUnoCard(ws, cards_hand, played, 
 					computerPlayer=computerPlayer, computerPlayerFunction=computerPlayerFunction)
 			card_play <- tmp[[1]]
 			card_play_save <- tmp[[2]]
@@ -188,25 +190,34 @@ playUno <- function(name,
 # Computer Player for UNO
 # very stupid - RANDOM
 #####################################################
-computerPlayerUNO <- function(hand, card_played)
+computerPlayerUNO <- function(ws, hand, card_played)
 {
-	# try for every card in the hand
-	for( h in 1:length(hand)){
-		#split cards for color and numner
-		hand_color <- strsplit(hand[h], "-")[[1]][1] 
- 		hand_number <- strsplit(hand[h], "-")[[1]][2]
-		played_color <- strsplit(card_played, "-")[[1]][1]
-		played_number <- strsplit(card_played, "-")[[1]][2]
-		# if color or number matches, return
-		if(hand_color == played_color || hand_number == played_number)
-			return(list(selectedCard=hand[h], playedCard=hand[h]))
-		# if color wish card, randomly choose one color
-		if(hand_color == "rybg")
-			return(list(selectedCard=hand[h], playedCard=sample(c("red-rybg", "yellow-rybg", "blue-rybg", "green-rybg"),1)))
-	}	
-	# if there is no matching card in the hand, NO card can be played
-	return(list(selectedCard="NO", playedCard="NO"))
+  require(nws)
+	unovec<-nwsFindTry(ws, 'uno')                                
+	names(unovec)<- nwsFindTry(ws,'players_logedin')
+  if(length(hand)==2 && !unovec[nwsFindTry(ws,'player_in_action')]){
+    unovec[nwsFindTry(ws,'player_in_action')]<-TRUE
+    nwsStore(ws,'uno',unovec)
+    
+  }
+	 # try for every card in the hand                    #CPChange
+	 for( h in 1:length(hand)){
+		  #split cards for color and numner
+		  hand_color <- strsplit(hand[h], "-")[[1]][1] 
+ 		  hand_number <- strsplit(hand[h], "-")[[1]][2]
+		  played_color <- strsplit(card_played, "-")[[1]][1]
+		  played_number <- strsplit(card_played, "-")[[1]][2]
+		  # if color or number matches, return
+		  if(hand_color == played_color || hand_number == played_number)
+			 return(list(selectedCard=hand[h], playedCard=hand[h]))
+		  # if color wish card, randomly choose one color #CPChange
+      if(hand_color == "rybg" && played_number != "rybg")
+			 return(list(selectedCard=hand[h], playedCard=sample(c("red-rybg", "yellow-rybg", "blue-rybg", "green-rybg"),1)))
+	 }	
+	 # if there is no matching card in the hand, NO card can be played
+	 return(list(selectedCard="NO", playedCard="NO"))
 }
+
 
 ##################################################
 # Function to move played cards back to the stack
@@ -233,12 +244,12 @@ computerPlayerUNO <- function(hand, card_played)
 ##################################################
 # Function to get played card
 ################################################
-.playUnoCard <- function(cards_hand, played, 
+.playUnoCard <- function(ws, cards_hand, played, 
 		computerPlayer=FALSE, computerPlayerFunction=computerPlayerUNO)
 {
   if(computerPlayer == TRUE){
 		#for computer player
-		tmp <- computerPlayerFunction(cards_hand, played)
+		tmp <- computerPlayerFunction(ws, cards_hand, played)
 		card_play <- tmp$selectedCard
 		card_play_save <- tmp$playedCard
 		cat("Play:", card_play_save, "\n")
