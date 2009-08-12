@@ -4,18 +4,27 @@
 createUnoGame <- function(wsName, ...)
 {
 	require(nws)
-
+	nwss<-nwsServer(...)
+  serverlist<-nwsListWss(nwss, showDataFrame=TRUE)
+  servernamebool<-TRUE
+  for(i in 1:length(serverlist$Name)){
+    if(wsName==serverlist$Name[[i]]){
+      servernamebool<-FALSE
+    }
+  }
+  if(servernamebool){
 	# create nws
 	ws <- netWorkSpace(wsName, ...)
 
 	# declare variables in nws
-	nwsDeclare(ws, 'players', 'fifo') 	# list of players for player rotation
+	#ToDo usernames not valid: players, played...
+  nwsDeclare(ws, 'players', 'fifo') 	# list of players for player rotation
 	nwsDeclare(ws, 'played', 'lifo') 	# played card
 	nwsDeclare(ws, 'cards', 'fifo') 	# stack of cards
 	nwsDeclare(ws, 'players_logedin', 'single') # vector of loged-in players
 	nwsDeclare(ws, 'player_in_action', 'single') # player in action
 	nwsDeclare(ws, 'winner', 'single') 	# name of winner
-	nwsDeclare(ws, 'penalty', 'single')	#if one player got penalty but can not play a card, next player should not get penalty too
+	nwsDeclare(ws, 'penalty', 'single')	# value of penalty
 	nwsDeclare(ws, 'debug' , 'single') 	# boolean for debug-mode
 	nwsDeclare(ws, 'points', 'single') 	# vector of points, in order of players_logedin
 	nwsDeclare(ws, 'uno' , 'single')  #vector of uno-booleans, in order of players_logedin
@@ -56,6 +65,10 @@ createUnoGame <- function(wsName, ...)
 	cat("start the game with the command 'startUnoGame(ws)'\n\n")
 
 	return(ws)
+ }
+ else{    #if workspacename allready exists
+ cat("Workspacename allready exists, please try another name\n")
+ }
 }
 
 ##########################################################
@@ -63,12 +76,13 @@ createUnoGame <- function(wsName, ...)
 # especially to get commands from master-user
 # and to wait for other players
 ############################################################
-startUnoGame <- function(ws, cardsStart=7, 
+startUnoGame <- function(ws, cardsStart=3, 
 		minPlayers=2, maxPlayers=10, 
-		log=FALSE, logfile=NULL, debug=FALSE)
+		log=0, logfile=NULL, debug=FALSE)
 {	
 	require(nws)
-
+  wsclass<-class(ws)
+  if(wsclass[1]=="netWorkSpace"){
 	readCommand <- ""
 	while(readCommand != "e"){
 
@@ -94,9 +108,9 @@ startUnoGame <- function(ws, cardsStart=7,
 			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile, debug=TRUE)
 			cat("For replay you have to reset the Game: createUnoGame()\n")
 			readCommand <- readline("End Game [e]?")
-		} else if( !(nplayers>=minPlayers) &&  readCommand=="s"){
+		} else if( !(nplayers>=minPlayers) &&  (readCommand=="s" || readCommand=="d")){
 			cat("You need more than ", nplayers," player!\n")
-		} else if( !(nplayers<=maxPlayers) &&  readCommand=="s"){
+		} else if( !(nplayers<=maxPlayers) &&  (readCommand=="s" || readCommand=="d")){
 			cat("You can only play with less than ", nplayers," players!\n")
 		} else if(readCommand=="o") 
 			cat("Players:", players, "\n")
@@ -106,6 +120,9 @@ startUnoGame <- function(ws, cardsStart=7,
 	nwsDeleteWs(ws@server, ws@wsName)
 	nwsClose(ws)
 	cat("GAME OVER \n")
+	}else{
+    cat("ws is no valid networkspace, please create one")
+  }
 }
 
 
@@ -116,7 +133,7 @@ startUnoGame <- function(ws, cardsStart=7,
 # * monitor game
 ##############################################################
 .playUnoMaster <- function(ws, players, 
-		cardsStart, log=FALSE, logfile=NULL, debug)
+		cardsStart, log=0, logfile=NULL, debug)
 {
 	require(nws)
 
@@ -188,7 +205,7 @@ startUnoGame <- function(ws, cardsStart=7,
 
 	#Operation during running game
 	cat("\tGame is running:\n")
-	if(log==TRUE){
+	if(log!=0){
 		winner <- watchUnoGame(ws, logfile=logfile)
 	} else {
 		winner <- .txtProgressBarNWS(ws, 'winner') 	
@@ -201,10 +218,16 @@ startUnoGame <- function(ws, cardsStart=7,
 
 ###########################################
 # Function to log the game
+# Log default = 0 -> no log
+#               1 -> names, winner , points
+#               2 -> 1, played cards
+#               3 -> 2, handcards
+#               4 -> 3, date, time...
 ##########################################
 watchUnoGame <- function(ws, ..., logfile=NULL)
 {	
 	require(nws)
+	
 	
 	#TODO: write to logfile
 	#TODO: log hand cards of players for statistics
@@ -218,7 +241,8 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
 	
 	# read played cards
 	card_played <- card_played_tmp <- ""
-	user <- user_tmp <- ""
+	user <- user_tmp <- "startcard"
+	output<-character()
 	while( is.null(winner <- nwsFindTry(ws, 'winner'))
 		|| card_played != card_played_tmp 
 		|| user != user_tmp
@@ -228,12 +252,14 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
 		#if played card has changed: output
 		if( card_played != card_played_tmp ){
 			cat(user, ": ", card_played, " (",length(nwsFindTry(ws,user)),")\n", sep="")
-			user <- nwsFindTry(ws, 'player_in_action')
+			output<-paste(output,user, ";", card_played, ";",length(nwsFindTry(ws,user)),"\n", sep="")
+      user <- nwsFindTry(ws, 'player_in_action')
 			user_tmp <- user # save player 
 			card_played_tmp <- card_played # save card
 		# if user has changed and no card: output
 		}else if( user != user_tmp){
 			cat(user_tmp, ": NO (",length(nwsFindTry(ws,user_tmp)),")\n", sep="")
+			output<-paste(output,user_tmp, ";NO;",length(nwsFindTry(ws,user_tmp)),"\n", sep="")
 			#user <- nwsFindTry(ws, 'players')
 			user_tmp <- user
 		}
@@ -241,7 +267,25 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
 		#code runs to fast for nws
 		Sys.sleep(0.15)
 	}
-		
+	# to get the last card into logfile
+	#if played card has changed: output
+		if( card_played != card_played_tmp ){
+			cat(user, ": ", card_played, " (",length(nwsFindTry(ws,user)),")\n", sep="")
+			output<-paste(output,user, ";", card_played, ";",length(nwsFindTry(ws,user)),"\n", sep="")
+      user <- nwsFindTry(ws, 'player_in_action')
+			user_tmp <- user # save player 
+			card_played_tmp <- card_played # save card
+		# if user has changed and no card: output
+		}else if( user != user_tmp){
+			cat(user_tmp, ": NO (",length(nwsFindTry(ws,user_tmp)),")\n", sep="")
+			output<-paste(output,user_tmp, ";NO;",length(nwsFindTry(ws,user_tmp)),"\n", sep="")
+			#user <- nwsFindTry(ws, 'players')
+			user_tmp <- user
+		}
+		user <- nwsFindTry(ws, 'player_in_action')
+		#code runs to fast for nws
+		Sys.sleep(0.15)
+	write(output,file = 'logfile.txt')	
 	#return winner
 	return(winner)
 }

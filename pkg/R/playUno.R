@@ -67,7 +67,7 @@ playUno <- function(name,
 		
 		cat("Players: ")
 		for(p in players){
-			cat(">>",p, " - (",length(nwsFindTry(ws,p))," card(s)<< ", sep="")
+			cat(">>",p, " - (",length(nwsFindTry(ws,p))," card(s))<< ", sep="")
 		}
     cat("\n")
 		
@@ -108,13 +108,15 @@ playUno <- function(name,
 			played_number <- strsplit(unlist(played), "-")[[1]][2]
 			cat("Table:", played,"\n")
 			
+			cards_hand <- nwsFindTry(ws, user)
+			cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
+			
 			# PENALTY
-			# TODO change for reaction to penalty cards
 			if( played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
 				rulesbools<-nwsFindTry(ws, 'rulesbools')
         if(rulesbools[3]){
           readPC<-""
-          while(readPC != "y" && readPC != "n"){
+          while(readPC != "y" && readPC != "n"){           
            readPC <- readline("Do you want to concatenate penalty?[y/n]")
             if(readPC=="y"){
               pc<-TRUE
@@ -128,6 +130,7 @@ playUno <- function(name,
   		  pen<-nwsFetchTry(ws, 'penalty')
         .getpenalty(ws,pen,user,0)
         nwsStore(ws, 'penalty', 0)
+        cards_hand <- nwsFindTry(ws, user)
         }       
 			}
 
@@ -149,10 +152,10 @@ playUno <- function(name,
   		  pen<-nwsFetchTry(ws, 'penalty')
         .getpenalty(ws,pen,user,0)
         nwsStore(ws, 'penalty', 0)
+        cards_hand <- nwsFindTry(ws, user)
         }       
 			}
-			cards_hand <- nwsFindTry(ws, user)
-			cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
+			
 			
 			# PLAY CARD
 			tmp <- .playUnoCard(cards_hand, played, 
@@ -169,10 +172,13 @@ playUno <- function(name,
 	}
 
 	# End of game, small output
+	.calculate(ws)
+	points<-nwsFindTry(ws,'points')
+	sumpoints<-sum(points)
 	if( nwsFindTry(ws,'winner') == user ){
-		cat("!! CONGRATULATION,", nwsFindTry(ws,'winner'), " you won !!\n")
+		cat("!! CONGRATULATION,", nwsFindTry(ws,'winner'), " you won with",sumpoints,"points!!\n")
 	} else
-		cat("Sorry you lost, winner:", nwsFindTry(ws,'winner'), "\n")
+		cat("Sorry you lost, winner:", nwsFindTry(ws,'winner'), ",with",sumpoints,"points!!\n")
 	
 	# close nws connection
 	nwsClose(ws)
@@ -416,7 +422,7 @@ computerPlayerUNO <- function(hand, card_played)
 	nwsStore(ws,'points',pointsvec)
 }
 #########################################################
-#Function for giving penalties
+#Function for getting penalties
 #########################################################
 .getpenalty <- function(ws,number,playerInAction,reasonnumber)
 {
@@ -441,6 +447,7 @@ computerPlayerUNO <- function(hand, card_played)
   }
   cat("You got ",number," penalty card(s)",reason,"!\n")
   nwsStore(ws,playerInAction,cards_hand)
+  cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
 }
 ########################################################
 #Function to remove card from hand
@@ -536,7 +543,7 @@ computerPlayerUNO <- function(hand, card_played)
 ##########################################################
 .getInfo<-function(ws)
 {
-  require(ws)
+  require(nws)
   maxi<- -Inf
   mini<- Inf
   sumi<- 0
@@ -544,7 +551,6 @@ computerPlayerUNO <- function(hand, card_played)
   players<-nwsFindTry(ws,'players_logedin')
   for(p in players){
       len<-length(nwsFindTry(ws,p))
-      cat("len",len,"\n")
      if(len > maxi){
      maxi <- len
      }
@@ -559,7 +565,7 @@ computerPlayerUNO <- function(hand, card_played)
   cat("\n      ",nwsFindTry(ws,'rulesbools'))
   cat("\n Cards in Deck: 102")
   cat("\n Players in Game: ",counter)
-  cat("\n Max Cards:",maxi)
-  cat("\n Min Cards: ",mini)
-  cat("\n Average Cards: ",sumi/counter,"\n")
+  cat("\n Max#Cards:",maxi)
+  cat("\n Min#Cards: ",mini)
+  cat("\n Average#Cards: ",sumi/counter,"\n")
 }        
