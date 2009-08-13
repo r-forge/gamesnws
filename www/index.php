@@ -65,22 +65,83 @@ Than a master user (one of the players) is required:
   <li>A master player has to create the game: ws <- createUnoGame('MyGame', serverHost='localhost')</li>
   <li>The master user has to start the game: startUnoGame(ws) </li>
 </ul>
-Than all players have to connect to the same server: playUno('MyGame', serverHost='localhost')<br>
+Than all players have to connect to the same server: playUno('MyGame', serverHost='localhost', user='username')<br>
 The rest is quite simple and will be explained during the game.
+</p>
+
+<h3>Example:</h3>
+  <p>Run 3 Unix-consoles.<br>
+  For all:<ul>
+  	<li>install.packages("gamesNws",repos="http://R-Forge.R-project.org")</li>
+  	<li>install.packages("nws")</li>
+  	<li>library(nws)</li>
+  	<li>library(gamesNws)</li></ul>
+  Console 1:<ul>
+  <li>ws <- createUnoGame('exampleWorkSpace', serverHost='138.245.80.17')</li>
+  <li>startUnoGame(ws)</li></ul>
+  Console 2:<ul>
+  <li>playUnoGame('exampleWorkSpace', serverHost='138.245.80.17', user='exampleplayer1')</li></ul>
+  Console 3:<ul>
+  <li>playUnoGame('exampleWorkSpace', serverHost='138.245.80.17', user='exampleplayer2')</li></ul>
+  Console 1:<ul>
+  <li>s</li>
+  <li>y</li>
+  <li>y</li>
+  <li>y</li>
+  <li>y</li></ul>
+  Console 2 or 3:<ul>
+  <li>get-info</li>
+  <li>NO</li>
+  <li>red-5</li></ul>
+</ul>
 </p>
 
 <h2>ToDo's</h2>
 <ul>
-  <li>UNO: calculate Points for winner</li>
-  <li>UNO: Show how many cards each player has</li>
-  <li>UNO: Player has to say "Uno" while playing the second to last card</li>
-  <li>UNO: The rybg-cards are not colorsensitve</li>
-  <li>UNO: Penalty for playing a wrong card</li>
-  <li>UNO: improve logging for more statistcs</li>
-  <li>Implement second game: POKER</li>
-  <li>Write documentation</li>
+  <li>logfile-directory</li>
+  <li>GUI</li>
+  <li>Further logging-modes for more statistical information</li>
+  <li>Further computer player with different skills:<ul>
+  	<li>Try to concatenate penalties</li>
+  	<li>Randomly forget to say "UNO"</li>
+  	<li>Try not to have rybg-cards at the end</li>
+  	<li>Try to combine BREAK and/or BACK cards in 2-Player-game</li>
+  	<li>Try to play maximum-scored card</li>
+  	<li>Try to play minimum-scored card</li>
+  	<li>...</li></ul></li>
   <li>Provide NWS-Game Server for everyone</li>
+  <li>Implement second game: POKER</li>
+  <li>Chat</li>
 </ul>
+
+<h2>UNO-Rules</h2>
+<p>We used the rules discribed in <a href="http://en.wikipedia.org/wiki/Uno_(game)">wikipedia(engl)</a>.<br>
+And we started to implement some of the additional rules described in <a href="http://de.wikipedia.org/wiki/Uno_(Kartenspiel)">German wikipedia</a>.</p>
+
+<h2>UNO-Commands</h2>
+<table border=1>
+	<tr>
+		<th>Command</th>
+		<th>Function</th>		
+	</tr>
+	<tr>
+		<td>get-info</td>
+		<td>shows some game-relevant information</td>
+	</tr>
+	<tr>
+		<td>say-uno</td>
+		<td>this command has to be issued, before the second-last card is played</td>
+	</tr>
+	<tr>
+		<td>NO</td>
+		<td>if you don't want or can't play a card</td>
+	</tr>
+	<tr>
+		<td>(color)-(value)</td>
+		<td>color = {red, yellow, blue, green, rybg}<br>value = {0:9, 2+, 4+, BREAK, BACK}</td>
+	</tr>
+</table>
+
 
 <h2>How to add further games to the 'gamesNWS' package?</h2>
 <p>ToDo</p>
