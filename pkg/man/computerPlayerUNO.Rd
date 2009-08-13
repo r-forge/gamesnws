@@ -4,9 +4,12 @@
 \title{Computer Player for UNO}
 \description{ Very stupid - random - computer player for UNO}
 \usage{
-	computerPlayerUNO(hand, card_played)
+	computerPlayerUNO(ws, 
+                    hand, 
+                    card_played)
 }
 \arguments{
+  \item{ws}{name of workspace, that is used in the whole program}
   \item{hand}{A vector of cards, which the player holds in his hand.}
   \item{card_played}{A string, which indicates the latest played card.}
 }
@@ -20,5 +23,6 @@ A list of two named strings,
 \item{played_card}{A string for the card, the player plays. Especially for color-selection cards (rybg), a color-rybg string has to be returned.}
 }
 \author{
-Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>
+Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>, 
+Fabian Grandke
 }

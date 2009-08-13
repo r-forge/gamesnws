@@ -1,65 +1,43 @@
 \name{playUno}
 \Rdversion{1.1}
 \alias{playUno}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-%%  ~~function to do ... ~~
-}
-\description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+\title{The function, that has to be called by each UNO-player}
+\description{The player calls it and inputs all necessary values. 
+The function rules the whole course of the UNO-game.}
 \usage{
-playUno(name, user = Sys.info()["user"], computerPlayer = FALSE, computerPlayerFunction = computerPlayerUNO, ...)
+playUno(  name, 
+          user = Sys.info()["user"], 
+          computerPlayer = FALSE, 
+          computerPlayerFunction = computerPlayerUNO, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{name}{
-%%     ~~Describe \code{name} here~~
-}
-  \item{user}{
-%%     ~~Describe \code{user} here~~
-}
-  \item{computerPlayer}{
-%%     ~~Describe \code{computerPlayer} here~~
-}
-  \item{computerPlayerFunction}{
-%%     ~~Describe \code{computerPlayerFunction} here~~
-}
-  \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
-}
+  \item{name}{Name of the workspace}
+  \item{user}{playername}
+  \item{computerPlayer}{is the player manual or automatical controlled}
+  \item{computerPlayerFunction}{which computerplayer is used}
+  \item{\dots}{}
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+This function rules everything, a player needs. It asks for decisions and shows information.
+Commands:
+say-uno: before playing the second-last card, you have to say uno
+get-info: shows some game relevant information
+color*-number**: plays card
+
+
+*color=(red,yellow,blue,green,rybg)
+**number=(0:9,2+,4+)
+
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>, 
+Fabian Grandke
 }
 \examples{
 \dontrun{
-	playUno("test")
+	playUno("test",user="tom",serverHost="138.245.80.17")
+}
+\dontrun{
+  playUno("test2",user="paul",computerPlayer=TRUE)
 }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

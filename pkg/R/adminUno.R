@@ -76,7 +76,7 @@ createUnoGame <- function(wsName, ...)
 # especially to get commands from master-user
 # and to wait for other players
 ############################################################
-startUnoGame <- function(ws, cardsStart=3, 
+startUnoGame <- function(ws, cardsStart=7, 
 		minPlayers=2, maxPlayers=10, 
 		log=0, logfile=NULL, debug=FALSE)
 {	
@@ -229,7 +229,6 @@ watchUnoGame <- function(ws, ..., logfile=NULL)
 	require(nws)
 	
 	
-	#TODO: write to logfile
 	#TODO: log hand cards of players for statistics
 	
 	# connect to nws server
