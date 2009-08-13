@@ -1,6 +1,6 @@
 ###########################################################
 # Main Function to play UNO for user
-######################################################
+###########################################################
 playUno <- function(name, 
 		user=Sys.info()["user"], 
 		computerPlayer=FALSE, computerPlayerFunction=computerPlayerUNO, 
@@ -42,17 +42,28 @@ playUno <- function(name,
     for(p in players){
       string<-c(string,p)
     }
-		pb <- txtProgressBar(min=0, max=10, style=1, width=10)
-		i <- 1
+    playerInActionOld <- nwsFindTry(ws, 'player_in_action')
+    pb <- txtProgressBar(min=0, max=10, style=1, width=1,char=paste("Wait for ",playerInActionOld," to act"))
+    i <- 1
     run <- 0
 		while( nwsFindTry(ws, 'player_in_action')!=user && is.null(nwsFindTry(ws, 'winner')) ){
-			setTxtProgressBar(pb, i)
-			if(run==0)
+			playerInAction <- nwsFindTry(ws, 'player_in_action')
+      if(playerInActionOld!=playerInAction){# if player changed, 
+                                                                                #new progressbar with player name
+        close(pb)
+        playerInActionOld<-playerInAction
+        pb <- txtProgressBar(min=0, max=10, style=1, width=1,char=paste("Wait for ",playerInAction," to act"))
+        i <- 1
+        run <- 0
+      }
+      setTxtProgressBar(pb, i)
+		  if(run==0)
 				i <- i+1
-			else i <- i-1
+		  else 
+        i <- i-1
 			if(i==10) run<-1
 			if(i==1) run<-0
-			Sys.sleep(0.1) #to reduce requests to NWS
+		Sys.sleep(0.1) #to reduce requests to NWS
 		}
 		close(pb)
 		playerInAction <- nwsFindTry(ws, 'player_in_action')

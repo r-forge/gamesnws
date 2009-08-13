@@ -1,7 +1,7 @@
 #####################################
 # Function to create Uno Game in NWS
 #####################################
-createUnoGame <- function(wsName, ...)
+.createUnoGame <- function(wsName, ...)
 {
 	require(nws)
 	nwss<-nwsServer(...)
@@ -61,13 +61,14 @@ createUnoGame <- function(wsName, ...)
 	nwsStore(ws, 'players_logedin', 'master')
 
 	#Some output
-	cat("Send the NWS-name and the server address to your other players and\n")
-	cat("start the game with the command 'startUnoGame(ws)'\n\n")
+	#cat("Send the NWS-name and the server address to your other players and\n")
+	#cat("start the game with the command 'startUnoGame(ws)'\n\n")
 
 	return(ws)
  }
  else{    #if workspacename allready exists
- cat("Workspacename allready exists, please try another name\n")
+ #cat("Workspacename allready exists, please try another name\n")
+ return("notaws")
  }
 }
 
@@ -76,11 +77,12 @@ createUnoGame <- function(wsName, ...)
 # especially to get commands from master-user
 # and to wait for other players
 ############################################################
-startUnoGame <- function(ws, cardsStart=7, 
+startUnoGame <- function(wsName, cardsStart=7, 
 		minPlayers=2, maxPlayers=10, 
-		log=0, logfile=NULL, debug=FALSE)
+		log=0, logfile=NULL, debug=FALSE,...)
 {	
 	require(nws)
+	ws<-.createUnoGame(wsName, ...)
   wsclass<-class(ws)
   if(wsclass[1]=="netWorkSpace"){
 	readCommand <- ""
@@ -121,7 +123,9 @@ startUnoGame <- function(ws, cardsStart=7,
 	nwsClose(ws)
 	cat("GAME OVER \n")
 	}else{
-    cat("ws is no valid networkspace, please create one")
+    cat("wsName is no valid networkspacename, please try another one")
+    	nwsDeleteWs(ws@server, ws@wsName)
+      nwsClose(ws)
   }
 }
 
@@ -206,7 +210,7 @@ startUnoGame <- function(ws, cardsStart=7,
 	#Operation during running game
 	cat("\tGame is running:\n")
 	if(log!=0){
-		winner <- watchUnoGame(ws, logfile=logfile)
+		winner <- .watchUnoGame(ws, logfile=logfile)
 	} else {
 		winner <- .txtProgressBarNWS(ws, 'winner') 	
 	}
@@ -224,7 +228,7 @@ startUnoGame <- function(ws, cardsStart=7,
 #               3 -> 2, handcards
 #               4 -> 3, date, time...
 ##########################################
-watchUnoGame <- function(ws, ..., logfile=NULL)
+.watchUnoGame <- function(ws, ..., logfile=NULL)
 {	
 	require(nws)
 	

@@ -6,6 +6,6 @@ Date: 2009-08-13
 Author: Markus Schmidberger, Fabian Grandke
 Maintainer: Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>
 Depends: nws
-Description: A package with different games (e.g. uno, poker, ...) using a NWS Server. You can play the games with your friends in the whole world. Just install a NWS Server, send the login data to your friends and start the game. 
+Description: This is a package with different card games (e.g. uno, poker, ...) and using a NWS Server as card table. You can play the games with your friends in the whole world. Just install a NWS Server at one machine, send the login data to your friends and start the game. 
 License: GPL
 LazyLoad: yes

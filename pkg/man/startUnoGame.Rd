@@ -1,43 +1,46 @@
 \name{startUnoGame}
 \Rdversion{1.1}
 \alias{startUnoGame}
-\title{Starts the UNO-Game that is in the given workspace}
-\description{After a UNO-Game is created in a workspace, it gets started with this function.}
+\title{Creates workspace and starts the UNO-Game - For Admin}
+\description{The Admin creates a workspace, starts an UNO-Game and dicides what game-conditions apply.}
 \usage{
-startUnoGame( ws, 
+startUnoGame( wsName, 
               cardsStart = 7, 
               minPlayers = 2, 
               maxPlayers = 10, 
               log = 0, 
               logfile = NULL, 
-              debug = FALSE)
+              debug = FALSE,
+              ...)
 }
 \arguments{
-  \item{ws}{workspace with a created UNO-Game in it}
+  \item{wsName}{workspacename}
   \item{cardsStart}{the number of cards, each player gets at the beginning}
   \item{minPlayers}{the number of players, that are necessary to start a game}
   \item{maxPlayers}{the number of players, that maximal can join a game}
-  \item{log}{number of log mode}
-  \item{logfile}{the directory, where the log should be saved to(not yet implemented)}
-  \item{debug}{logical variable if debug mode is enabled}
+  \item{log}{number of log mode : 0 = no logging, !0=logging }
+  \item{logfile}{the file, where the log should be saved to(not yet implemented)}
+  \item{debug}{a logical, if TRUE, there are several debuginformation shown during the game}
+  \item{...}{Usual parameters to initialize a netWorkSpace(). See \url{http://nws-r.sourceforge.net/doc/nwsR-1.5.0.pdf} (Page 25) for further information}
 }
 \details{
 After starting the game, with this function, the players could log in with playUno().
-When you started the game, you can decide the play mode.
-
+This function only creates and starts the game. It does not play.
 }
-
+\references{
+\url{http://gamesnws.r-forge.r-project.org/}
+}
 \author{
 Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>, 
 Fabian Grandke
 }
 \examples{
 \dontrun{
-  ws<-createUnoGame("test","138.245.80.17")
+  ws<-createUnoGame("test","localhost")
   startUnoGame(ws,log=1)
 }
 \dontrun{
-  ws<-createUnoGame("test","138.245.80.17")
+  ws<-createUnoGame("test","localhost")
   startUnoGame(ws, cardsStart=13, minPlayers=4)
 }
 }
