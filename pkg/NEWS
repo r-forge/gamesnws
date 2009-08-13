@@ -1,0 +1,12 @@
+# R Package gamesNws - NEWS
+#
+# Copyright (C) 2009 : Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>
+###############################################################################
+
+gamesNws 0.4.0 (build 13. August 2009)
+- documentation
+- logfiles added
+- bug fixes
+
+gamesNws 0.3.0 (build 01. August 2009)
+- main concept implemented
