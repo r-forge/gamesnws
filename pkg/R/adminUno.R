@@ -79,7 +79,7 @@
 ############################################################
 startUnoGame <- function(wsName, cardsStart=7, 
 		minPlayers=2, maxPlayers=10, 
-		log=0, logfile=NULL, debug=FALSE,...)
+		log=0, logfile=NULL, debug=FALSE, config=NULL,...)
 {	
 	require(nws)
 	ws<-.createUnoGame(wsName, ...)
@@ -87,6 +87,7 @@ startUnoGame <- function(wsName, cardsStart=7,
   if(wsclass[1]=="netWorkSpace"){
 	readCommand <- ""
 	while(readCommand != "e"){
+		nwsStore(ws,'rulesbools', config)
 
 		# Ask for command from master user
 		readCommand <- readline("Players online [o], Start Game [s], End Game [e], Start Game in Debugmode [d]?")
@@ -99,13 +100,17 @@ startUnoGame <- function(wsName, cardsStart=7,
 
 		# Commands for actions depending on master-user Input
 		if(readCommand=="s" && nplayers>=minPlayers && nplayers<=maxPlayers){
-		  .askForRules(ws)
+		  	if(is.null(config)){
+				.askForRules(ws)
+			}
       # Start UNO game	
 			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile, debug)
 			cat("For replay you have to reset the Game: createUnoGame()\n")
 			readCommand <- readline("End Game [e]?")
 		}else if(readCommand=="d" && nplayers>=minPlayers && nplayers<=maxPlayers){
-      .askForRules(ws)
+		  	if(is.null(config)){
+				.askForRules(ws)
+			}
       # Start UNO game	
 			.playUnoMaster(ws, players, cardsStart, log=log, logfile=logfile, debug=TRUE)
 			cat("For replay you have to reset the Game: createUnoGame()\n")
