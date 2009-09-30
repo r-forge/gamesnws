@@ -389,9 +389,6 @@ computerPlayerUNO <- function(ws, hand, card_played)
 	unovec<-nwsFindTry(ws, 'uno')                                
 	names(unovec)<- nwsFindTry(ws,'players_logedin')
 	if(unovec[playerInAction] && length(cards_hand) > 2){
-		print(length(cards_hand))
-		print(cards_hand)
-		print(unovec[playerInAction])
 		 unovec[playerInAction]<-FALSE
 		 nwsStore(ws, 'uno',unovec)
 	}
@@ -879,7 +876,6 @@ computerPlayerUNO <- function(ws, hand, card_played)
 		if(unovec[k]){
 			text(x=x,y=y+0.02,label="UNO!",col="red",cex=1.5)
 		}
-		print(unovec)
 	}
 	# get played card
 	played <- nwsFindTry(ws, 'played')
