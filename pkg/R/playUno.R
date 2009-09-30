@@ -37,13 +37,13 @@ playUno <- function(name,
 	#options(show.error.messages = FALSE
 	graphics <- nwsFindTry(ws, 'graphics')
 	if(graphics){
-	#osinfo<-Sys.info()[1]
-	#if(grep("Windows",osinfo)==1){
-		#windows(height=12,width=14,xpos=1,ypos=1,canvas="mediumseagreen",bg="transparent")
-	#}
-	#else{
-	X11(height=12,width=14,xpos=1,ypos=1,canvas="mediumseagreen",bg="transparent")
-	
+	osinfo<-Sys.info()[1]
+	if(grepl("Windows",osinfo)){
+		windows(height=12,width=14,xpos=1,ypos=1,canvas="mediumseagreen",bg="transparent")
+	}
+	else{
+	   X11(height=12,width=14,xpos=1,ypos=1,canvas="mediumseagreen",bg="transparent")
+	}
 	#options(show.error.messages = TRUE)
 	playercoord<-list(c(0.5,0.05),c(0.5,0.95),c(0.05,0.35),c(0.95,0.65),c(0.05,0.65),c(0.95,0.35),c(0.15,0.1),
 	c(0.85,0.9),c(0.85,0.1),c(0.15,0.9))
