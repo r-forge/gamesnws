@@ -44,44 +44,45 @@ echo $contents; } ?>
 
  end of project description -->
  
-<h1>Welcome to Play games with R using the NWS Server technology!</h1>
+<h1>Welcome to Play Games with R using the NWS Server Technology!</h1>
 <p>The R package 'gamesNWS' provides an infrastructure to play different 
-card games (e.g. uno, poker) in a network. You can play the games with your friends 
+card games (e.g. uno, poker) in a computer network. You can play the games with your friends 
 in the whole world or against several computer players at your local machine. 
-For the communication a NetWorkSpace Server and the R package NWS will be used. 
+For the communication a NetWorkSpace Server and the R package NWS is used. 
 Just install a NWS Server, send the login data to your friends and start the game. 
 </p>
 
 <h2>How to play a game?</h2>
 <p>Everyone has to install the 'gamesNWS' and 'NWS' package. 
 <ul>
-  <li>install.packages("gamesNws",repos="http://R-Forge.R-project.org")</li>
-  <li>install.packages("nws")</li>
+  <li><em>install.packages("gamesNws",repos="http://R-Forge.R-project.org")</em></li>
+  <li><em>install.packages("nws")</em></li>
 </ul>
 Than a master user (one of the players) is required:
 <ul>
   <li>First of all you need a running NWS Server. The installation is quite simple: http://nws-r.sourceforge.net/</li>
-  <li>A master player has to create the game(e.g. a Uno game): startUnoGame('MyGame', serverHost='localhost') </li>
+  <li>A master player has to create the game (e.g. an Uno game): <em>startUnoGame('MyGame', serverHost='localhost')</em></li>
 </ul>
-Than all players have to connect to the same server(e.g. a Uno game): playUno('MyGame', serverHost='localhost', user='username')<br>
+Than all players have to connect to the same server (e.g. a Uno game): <em>playUno('MyGame', serverHost='localhost', user='username')</em><br>
 The rest is quite simple and will be explained during the game.
 </p>
 
-<h3>Example(UNO):</h3>
+<h3>Example code for UNO:</h3>
   <p>Start three R sessions<br>
   For all:<ul>
-  	<li>install.packages("gamesNws",repos="http://R-Forge.R-project.org")</li>
-  	<li>library(gamesNws)</li></ul>
+  	<li><em>install.packages("gamesNws", repos="http://R-Forge.R-project.org")</em></li>
+  	<li><em>library(gamesNws)</em></li></ul>
   Console 1:<ul>
-  <li>startUnoGame('exampleWorkSpace', serverHost='localhost',config=c(T,T,T,T))</li></ul>
+  <li><em>startUnoGame('exampleWorkSpace', serverHost='localhost', config=c(T,T,T,T))</em></li></ul>
   Console 2:<ul>
-  <li>playUnoGame('exampleWorkSpace', serverHost='localhost', user='exampleplayer1')</li></ul>
+  <li><em>playUnoGame('exampleWorkSpace', serverHost='localhost', user='exampleplayer1')</em></li></ul>
   Console 3:<ul>
-  <li>playUnoGame('exampleWorkSpace', serverHost='localhost', user='exampleplayer2')</li></ul>
+  <li><em>playUnoGame('exampleWorkSpace', serverHost='localhost', user='exampleplayer2')</em></li></ul>
   Console 1:<ul>
-  <li>s</li></ul>
-  Console 2 or 3:<ul>
-  Depending on the played card,you can play one of the following commands:
+  <li>Enter <em>s</em> to start the game.</li></ul>
+  Console 2 or 3: In default you will get a GUI. 
+  If you play with the command line, depending on the played card, you can play one of the following commands:
+  <ul>
   <li>get-info (shows some game-relevant information)</li>
   <li>NO (if you don't want or can't play a card)</li>
   <li>color-value (plays one of your hand cards)</li></ul>
@@ -91,6 +92,7 @@ The rest is quite simple and will be explained during the game.
 <h2>Implemented Games:</h2>
 <ul>
 <li><a href="uno.html">UNO</a></li>
+<li>soon more</li>
 </ul>
 
 <h2>ToDo's</h2>
