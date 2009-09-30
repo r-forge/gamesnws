@@ -1,0 +1,90 @@
+
+<!-- This is the project specific website template -->
+<!-- It can be changed as liked or replaced by other content -->
+<!DOCTYPE html
+	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en   ">
+
+  <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title><?php echo $group_name; ?></title>
+	<link href="<?php echo $themeroot; ?>styles/estilo1.css" rel="stylesheet" type="text/css" />
+  </head>
+
+<body>
+
+<!-- R-Forge Logo -->
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+<tr><td>
+<a href="/"><img src="images/Rlogo.jpg" border="0" alt="R-Forge Logo" /> </a> </td> </tr>
+<tr><td align="right">
+<img src="images/gamesNWS.jpg" border="0" alt="R-gamesNWS Logo" /></td> </tr>
+</table>
+
+
+<!-- get project title  -->
+<!-- own website starts here, the following may be changed as you like 
+
+<?php if ($handle=fopen('http://'.$domain.'/export/projtitl.php?group_name='.$group_name,'r')){
+$contents = '';
+while (!feof($handle)) {
+	$contents .= fread($handle, 8192);
+}
+fclose($handle);
+echo $contents; } ?>
+
+ end of project description -->
+ 
+<h1>Welcome to Play UNO with R using the NWS Server technology!</h1>
+
+<h2>UNO - ToDo's</h2>
+<ul>
+  <li>logfile-directory</li>
+  <li>GUI</li>
+  <li>Further logging-modes for more statistical information</li>
+  <li>Further computer player with different skills:<ul>
+  	<li>Try to concatenate penalties</li>
+  	<li>Randomly forget to say "UNO"</li>
+  	<li>Try not to have rybg-cards at the end</li>
+  	<li>Try to combine BREAK and/or BACK cards in 2-Player-game</li>
+  	<li>Try to play maximum-scored card</li>
+  	<li>Try to play minimum-scored card</li>
+  	
+  	<li>...</li></ul></li>
+   <li>Chat</li>
+</ul>
+
+<h2>UNO-Rules</h2>
+<p>We used the rules discribed in <a href="http://en.wikipedia.org/wiki/Uno_(game)">wikipedia(engl)</a>.<br>
+And we started to implement some of the additional rules described in <a href="http://de.wikipedia.org/wiki/Uno_(Kartenspiel)">German wikipedia</a>.</p>
+
+<h2>UNO-Commands</h2>
+<table border=1>
+	<tr>
+		<th>Command</th>
+		<th>Function</th>		
+	</tr>
+	<tr>
+		<td>get-info</td>
+		<td>shows some game-relevant information</td>
+	</tr>
+	<tr>
+		<td>say-uno</td>
+		<td>this command has to be issued, before the second-last card is played<br>otherwise a penalty card is given</td>
+	</tr>
+	<tr>
+		<td>NO</td>
+		<td>if you don't want or can't play a card</td>
+	</tr>
+	<tr>
+		<td>(color)-(value)</td>
+		<td>color = {red, yellow, blue, green, rybg}<br>value = {0:9, 2+, 4+, BREAK, BACK}</td>
+	</tr>
+</table>
+
+
+<p> The <strong>gamesNWS main page</strong> you can find <a href="index.php"><strong>here</strong></a>. </p>
+
+</body>
+</html>
