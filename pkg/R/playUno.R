@@ -38,7 +38,7 @@ playUno <- function(name,
 	graphics <- nwsFindTry(ws, 'graphics')
 	if(graphics){
 	osinfo<-Sys.info()[1]
-	if(grep("Linux",osinfo)!=1){
+	if(grep("Windows",osinfo)==1){
 		windows(height=12,width=14,xpos=1,ypos=1,canvas="mediumseagreen",bg="transparent")
 	}
 	else{
@@ -69,7 +69,7 @@ playUno <- function(name,
 				run <- 0
       			}
       			setTxtProgressBar(pb, i)
-		  	if(run==0)
+		  	if(run==0)          
 				i <- i+1
 		  	else 
         		i <- i-1
@@ -328,7 +328,9 @@ computerPlayerUNO <- function(ws, hand, card_played)
 						success<-T 
 						if(buttonlist[[c]][[6]]=="Help"){
 							.showhelp()
-							.repaint(ws,cards_hand)		
+							.repaint(ws,cards_hand)
+						 print("test")
+              card_play<-"get-info"		
 						}
 						else if(buttonlist[[c]][[6]]=="NO-Card"){
 							card_play<-"NO"
@@ -336,7 +338,6 @@ computerPlayerUNO <- function(ws, hand, card_played)
 						else if(buttonlist[[c]][[6]]=="Uno"){
 							card_play<-"say-uno"
 						}
-						text(x=0.3,y=0,5,label=c)
 						Sys.sleep(0.5)
 					}
 				}
