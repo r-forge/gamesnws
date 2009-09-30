@@ -18,7 +18,7 @@
 
 	# declare variables in nws
 	#ToDo usernames not valid: players, played...
-  nwsDeclare(ws, 'players', 'fifo') 	# list of players for player rotation
+  	nwsDeclare(ws, 'players', 'fifo') 		# list of players for player rotation
 	nwsDeclare(ws, 'played', 'lifo') 	# played card
 	nwsDeclare(ws, 'cards', 'fifo') 	# stack of cards
 	nwsDeclare(ws, 'players_logedin', 'single') # vector of loged-in players
@@ -27,9 +27,12 @@
 	nwsDeclare(ws, 'penalty', 'single')	# value of penalty
 	nwsDeclare(ws, 'debug' , 'single') 	# boolean for debug-mode
 	nwsDeclare(ws, 'points', 'single') 	# vector of points, in order of players_logedin
-	nwsDeclare(ws, 'uno' , 'single')  #vector of uno-booleans, in order of players_logedin
-	nwsDeclare(ws, 'rules' , 'single') #vector of the rules
-  nwsDeclare(ws, 'rulesbools', 'single')#vector of booleanvalues in order of rules 
+	nwsDeclare(ws, 'uno' , 'single')  	#vector of uno-booleans, in order of players_logedin
+	nwsDeclare(ws, 'rules' , 'single') 	#vector of the rules
+  	nwsDeclare(ws, 'rulesbools', 'single')	#vector of booleanvalues in order of rules 
+	nwsDeclare(ws,	'graphics', 'single')	#boolean if graphic device is shown
+	#nwsDeclare(ws, 'buttonlist','single')	#list of buttons
+	#nwsDeclare(ws, 'cardcoord','single')	#list of coordinates of the cards
 	
   # user declares own variable for his hand-cards in .playUnoMaster()
 
@@ -51,7 +54,7 @@
 			rep("green-BREAK",2),
 			rep("green-2+",2),
 			rep("green-BACK",2),
-			rep("rybg-0", 4), rep("rybg-4+",4)
+			rep("rybg-00", 4), rep("rybg-4+",4)
 	)
 	cards <- sample(cards)
 	for( i in 1:length(cards))
@@ -79,7 +82,7 @@
 ############################################################
 startUnoGame <- function(wsName, cardsStart=7, 
 		minPlayers=2, maxPlayers=10, 
-		log=0, logfile=NULL, debug=FALSE, config=NULL,...)
+		log=0, logfile=NULL, debug=FALSE, config=NULL,graphics=TRUE,...)
 {	
 	require(nws)
 	ws<-.createUnoGame(wsName, ...)
@@ -88,6 +91,7 @@ startUnoGame <- function(wsName, cardsStart=7,
 	readCommand <- ""
 	while(readCommand != "e"){
 		nwsStore(ws,'rulesbools', config)
+		nwsStore(ws,'graphics', graphics)
 
 		# Ask for command from master user
 		readCommand <- readline("Players online [o], Start Game [s], End Game [e], Start Game in Debugmode [d]?")

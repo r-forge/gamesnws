@@ -11,7 +11,8 @@ startUnoGame( wsName,
               log = 0, 
               logfile = NULL, 
               debug = FALSE,
-	      config = NULL,
+              config = NULL,
+              graphics = TRUE,
               ...)
 }
 \arguments{
@@ -22,7 +23,8 @@ startUnoGame( wsName,
   \item{log}{number of log mode : 0 = no logging, !0=logging }
   \item{logfile}{the file, where the log should be saved to(not yet implemented)}
   \item{debug}{a logical, if TRUE, there are several debuginformation shown during the game}
-  \item{config}{vector of four logicals, if not set, the program asks for the rules later, }
+  \item{config}{vector of four logicals, if not set, the program asks for the rules later}
+  \item{graphics}{a logical, if TRUE, a grapic device is shown to the players }
   \item{...}{Usual parameters to initialize a netWorkSpace(). See \url{http://nws-r.sourceforge.net/doc/nwsR-1.5.0.pdf} (Page 25) for further information}
 }
 \details{
