@@ -1,9 +1,9 @@
 \name{createUnoGame}
 \Rdversion{1.1}
-\alias{createUnoGame}
+\alias{.createUnoGame}
 \title{Creates new UNO-Game}
 \description{New UNO-Game into the given workspace}
-\usage{createUnoGame( wsName, 
+\usage{.createUnoGame( wsName, 
                       ...)}
 \arguments{
   \item{wsName}{Name of the workspace}
@@ -22,7 +22,7 @@ Fabian Grandke
 }
 \examples{
 \dontrun{
-  ws<-createUnoGame("test","138.245.80.17")
+  ws<-.createUnoGame("test","138.245.80.17")
   startUnoGame(ws)
 }
 }

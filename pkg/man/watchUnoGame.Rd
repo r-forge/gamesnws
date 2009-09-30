@@ -1,10 +1,10 @@
 \name{watchUnoGame}
 \Rdversion{1.1}
-\alias{watchUnoGame}
+\alias{.watchUnoGame}
 \title{logs the game}
 \description{writes a logfile of the game and returns the winner}
 \usage{
-watchUnoGame( ws, 
+.watchUnoGame( ws, 
               ..., 
               logfile = NULL)
 }
@@ -28,7 +28,7 @@ Fabian Grandke
 \examples{
 \dontrun{
   if(log!=0){
-		winner <- watchUnoGame(ws, logfile=logfile)
+		winner <- .watchUnoGame(ws, logfile=logfile)
   }
 }
 }
