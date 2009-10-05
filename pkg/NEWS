@@ -2,6 +2,9 @@
 #
 # Copyright (C) 2009 : Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>
 ###############################################################################
+gamesNws 0.5.0 (build 05. October 2009)
+- GUI implemented
+- bug fixes
 
 gamesNws 0.4.0 (build 13. August 2009)
 - documentation

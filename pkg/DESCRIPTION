@@ -1,8 +1,8 @@
 Package: gamesNws
 Type: Package
 Title: Playing games using a NWS Server
-Version: 0.4
-Date: 2009-08-13
+Version: 0.5
+Date: 2009-10-05
 Author: Markus Schmidberger, Fabian Grandke
 Maintainer: Markus Schmidberger <schmidb@ibe.med.uni-muenchen.de>
 Depends: nws
