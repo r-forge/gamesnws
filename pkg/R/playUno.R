@@ -146,6 +146,7 @@ playUno <- function(name,
 			cards_hand <- nwsFindTry(ws, user)
 			cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
 			# PENALTY
+			pc<-FALSE
 			if(graphics){.repaint(ws,cards_hand,user)}
 				if(computerPlayer == FALSE){ # CPChange 
 					if(played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
@@ -225,6 +226,22 @@ playUno <- function(name,
 			card_play <- tmp[[1]]
 			card_play_save <- tmp[[2]]
 			
+      if(nwsFindTry(ws, 'penalty') != 0){
+        tmp2 <- strsplit(card_play_save, "-")
+  	     card_play_color <- tmp2[[1]][1]
+  	     if( is.na(tmp2[[1]][2]) )
+  		      card_play_number <- ""
+  	     else
+  		    card_play_number <- tmp2[[1]][2]
+  			if(pc && !(card_play_number=="2+" || card_play_save=="rybg-4+")){
+                pen<-nwsFetchTry(ws, 'penalty')
+  							.getpenalty(ws,pen,user,0)
+  							nwsStore(ws, 'penalty', 0)
+  							cards_hand <- nwsFindTry(ws, user)	
+        
+        }
+      }
+			
 			#ACTION DEPENDING ON CARD TYPE
 			tmp <- .playUnoAction(ws, card_play, card_play_save, user, cards_hand, played, NO)
 			card_play<- tmp[[1]]
@@ -241,7 +258,7 @@ playUno <- function(name,
 		if( nwsFindTry(ws,'winner') == user ){
 			text(x=0.5,y=0.6,label=paste("!! CONGRATULATION,", nwsFindTry(ws,'winner'), " you won with",sumpoints,"points!!\n"),cex=1)
 		} else{
-			text(x=0.5,y=0.6,label=paste("Sorry you lost, winner:", nwsFindTry(ws,'winner'), ",with",sumpoints,"points!!\n"),cex=1)}
+			text(x=0.5,y=0.6,label=paste("Sorry you lost, winner: ", nwsFindTry(ws,'winner'), ", with ",sumpoints," points!!\n",sep=""),cex=1)}
 		#close windows/X11
 		#Sys.sleep(2)
 		if(computerPlayer==FALSE){
@@ -600,10 +617,12 @@ computerPlayerUNO <- function(ws, hand, card_played)
   players<-nwsFindTry(ws,'players_logedin')
   for(c in 1:length(players)){
      if(players[[c]]==playerInAction){
-	cpuval<-cpu[c]
+	       cpuval<-cpu[c]
+	       unovec<-nwsFindTry(ws,'uno')
+	       unovec[c]<-FALSE
+         nwsStore(ws,'uno',unovec)
      }
   }
-print(cpuval)
   if(graphics==FALSE){cat("You got ",number," penalty card(s)",reason,"!\n")}
   else if(cpuval==FALSE){
 	xbut<-0.5
@@ -873,21 +892,21 @@ print(cpuval)
 ###############################################################################
 .askforpenalty<-function()
 {
-	polygon(c(0.3,0.3,0.7,0.7),c(0.7,0.9,0.9,0.7),col="blanchedalmond",border=NA)
-	text(x=0.5,y=0.85,label="Concatenate penalty?",cex=2,col="black")
-	buttonlist<-list(list(0.45,0.78,1,3,"mediumseagreen","","",1,0),list(0.55,0.78,2,3,"mediumseagreen","","",1,0))
+	polygon(c(0.3,0.3,0.7,0.7),c(0.8,0.95,0.95,0.8),col="blanchedalmond",border=NA)
+	text(x=0.5,y=0.9,label="Concatenate penalty?",cex=2,col="black")
+	buttonlist<-list(list(0.45,0.85,1,3,"mediumseagreen","","",1,0),list(0.55,0.85,2,3,"mediumseagreen","","",1,0))
 	.drawsquarebutton(xval=buttonlist[[1]][[1]],yval=buttonlist[[1]][[2]],type=buttonlist[[1]][[3]],size=buttonlist[[1]][[4]],color=buttonlist[[1]][[5]],clicked=F)
 	.drawsquarebutton(xval=buttonlist[[2]][[1]],yval=buttonlist[[2]][[2]],type=buttonlist[[2]][[3]],size=buttonlist[[2]][[4]],color=buttonlist[[2]][[5]],clicked=F)
 	while(T){
 		klick<-locator(n=1)
 		kx<-klick[[1]]
 		ky<-klick[[2]]
-		if(kx>(0.45-(3/100))&& kx<(0.45+(3/100)) && ky>(0.78-(3/100)) && ky<(0.78+(3/100))){
+		if(kx>(0.45-(3/100))&& kx<(0.45+(3/100)) && ky>(0.85-(3/100)) && ky<(0.85+(3/100))){
 			.drawsquarebutton(xval=buttonlist[[1]][[1]],yval=buttonlist[[1]][[2]],type=buttonlist[[1]][[3]],size=buttonlist[[1]][[4]],color=buttonlist[[1]][[5]],clicked=T)
         		Sys.sleep(0.5)
 			return("y")
 		}
-		else if(kx>(0.55-(3/100))&& kx<(0.55+(3/100)) && ky>(0.78-(3/100)) && ky<(0.78+(3/100))){
+		else if(kx>(0.55-(3/100))&& kx<(0.55+(3/100)) && ky>(0.85-(3/100)) && ky<(0.85+(3/100))){
 			.drawsquarebutton(xval=buttonlist[[2]][[1]],yval=buttonlist[[2]][[2]],type=buttonlist[[2]][[3]],size=buttonlist[[2]][[4]],color=buttonlist[[2]][[5]],clicked=T)
         		Sys.sleep(0.5)
 			return("n")
