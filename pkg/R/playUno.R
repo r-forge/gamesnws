@@ -9,7 +9,6 @@ playUno <- function(name,
 	require(nws)
 	# Login to nws
 	ws <- netWorkSpace(name, ...)
-	  
 	# set user to nws: log in
 	while ( is.null(players_logedin <- nwsFetchTry(ws, 'players_logedin')) )
 	{ }# if players_logedin is empty, wait while other user is registering
@@ -35,6 +34,16 @@ playUno <- function(name,
 	# play the game, as long as there is no winner
 	# create playground
 	#options(show.error.messages = FALSE
+	players<-nwsFindTry(ws,'players_logedin')
+	if(computerPlayer==TRUE){
+		for(c in 1:length(players)){
+			if(players[[c]]==user){
+				cpu<-nwsFindTry(ws,'cpu')
+				cpu[c]<-TRUE
+				nwsStore(ws,'cpu',cpu)
+			}
+		}  
+	}
 	graphics <- nwsFindTry(ws, 'graphics')
 	if(graphics){
 	osinfo<-Sys.info()[1]
@@ -45,8 +54,11 @@ playUno <- function(name,
 	   X11(height=12,width=14,xpos=1,ypos=1,canvas="mediumseagreen",bg="transparent")
 	}
 	#options(show.error.messages = TRUE)
-	playercoord<-list(c(0.5,0.05),c(0.5,0.95),c(0.05,0.35),c(0.95,0.65),c(0.05,0.65),c(0.95,0.35),c(0.15,0.1),
-	c(0.85,0.9),c(0.85,0.1),c(0.15,0.9))
+	#playercoord<-list(c(0.5,0.05),c(0.5,0.95),c(0.05,0.35),c(0.95,0.65),c(0.05,0.65),c(0.95,0.35),c(0.15,0.1),
+	#c(0.85,0.9),c(0.85,0.1),c(0.15,0.9))
+	plot.new()
+	text(x=0.5,y=0.6,label="Welcome \nto UNO!",col="red",cex=3)
+	text(x=0.5,y=0.4,label="Please wait until \nit's your turn...",col="black",cex=1.5)	
 	}
 	while(is.null(nwsFindTry(ws, 'winner')) ){
 # 		players<-nwsFindTry(ws,'players_logedin')		
@@ -107,7 +119,7 @@ playUno <- function(name,
 			# SOME OUTPUT
 			#Debuginformation
 			if(nwsFindTry(ws, 'debug')){
-        #calculate points
+       			 #calculate points
 		    .calculate(ws)
 				cat("\nDebuginformation:\n")			
 				cat("	Players in Game: ",length(nwsFindTry(ws,'players_logedin')),"\n")
@@ -134,56 +146,74 @@ playUno <- function(name,
 			cards_hand <- nwsFindTry(ws, user)
 			cat("Hand:", sort(unlist(cards_hand)), "\n") #sorted output
 			# PENALTY
-			if(graphics){.repaint(ws,cards_hand)}
-			if(computerPlayer == FALSE){ # CPChange 
-      if(played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
-				rulesbools<-nwsFindTry(ws, 'rulesbools')
-        if(rulesbools[3]){
-          readPC<-""
-          while(readPC != "y" && readPC != "n"){           
-           if(graphics==FALSE){readPC <- readline("Do you want to concatenate penalty?[y/n]")}
-		else{readPC<-.askforpenalty()
-		.repaint(ws,cards_hand)}
-            if(readPC=="y"){
-              pc<-TRUE
-            }
-            else if(readPC=="n"){
-              pc<-FALSE
-            }   
-           }
-         }
-        if(!pc || !rulesbools[3]){
-  		  pen<-nwsFetchTry(ws, 'penalty')
-        .getpenalty(ws,pen,user,0)
-        nwsStore(ws, 'penalty', 0)
-        cards_hand <- nwsFindTry(ws, user)
-        }       
-			}
+			if(graphics){.repaint(ws,cards_hand,user)}
+				if(computerPlayer == FALSE){ # CPChange 
+					if(played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
+						rulesbools<-nwsFindTry(ws, 'rulesbools')
+						if(rulesbools[3]){
+							readPC<-""
+							while(readPC != "y" && readPC != "n"){           
+								if(graphics==FALSE){readPC <- readline("Do you want to concatenate penalty?[y/n]")}
+									else{readPC<-.askforpenalty()
+									.repaint(ws,cards_hand,user)}
+								if(readPC=="y"){
+								pc<-TRUE
+								}
+								else if(readPC=="n"){
+								pc<-FALSE
+								}   
+							}
+						}
+						if(!pc || !rulesbools[3]){
+							pen<-nwsFetchTry(ws, 'penalty')
+							.getpenalty(ws,pen,user,0)
+							nwsStore(ws, 'penalty', 0)
+							cards_hand <- nwsFindTry(ws, user)
+						}       
+					}
+				
+					if( played_number =='rybg4+' && nwsFindTry(ws, 'penalty') != 0){
+						rulesbools<-nwsFindTry(ws, 'rulesbools')
+						if(rulesbools[3]){
+							readPC<-""
+							while(readPC != "y" && readPC != "n"){
+								if(graphics==FALSE){readPC <- readline("Do you want to concatenate penalty?[y/n]")}
+									else{
+										readPC<-.askforpenalty()
+										.repaint(ws,cards_hand,user)
+									}
+									if(readPC=="y"){
+									pc<-TRUE
+									}
+									else if(readPC=="n"){
+									pc<-FALSE
+									}   
+								}
+							} 
+							if(!pc || !rulesbools[3]){
+								pen<-nwsFetchTry(ws, 'penalty')
+								.getpenalty(ws,pen,user,0)
+								nwsStore(ws, 'penalty', 0)
+								cards_hand <- nwsFindTry(ws, user)
+							}       
+						}
+				}
+				else{
+					if(played_number =='2+'&& nwsFind(ws, 'penalty') != 0){
+							pen<-nwsFetchTry(ws, 'penalty')
+							.getpenalty(ws,pen,user,0)
+							nwsStore(ws, 'penalty', 0)
+							cards_hand <- nwsFindTry(ws, user)	
+					}				
+					if(played_number =='rybg4+'&& nwsFind(ws, 'penalty') != 0){
+							pen<-nwsFetchTry(ws, 'penalty')
+							.getpenalty(ws,pen,user,0)
+							nwsStore(ws, 'penalty', 0)
+							cards_hand <- nwsFindTry(ws, user)	
+					}			
 
-			if( played_number =='rybg4+' && nwsFindTry(ws, 'penalty') != 0){
-				rulesbools<-nwsFindTry(ws, 'rulesbools')
-        if(rulesbools[3]){
-          readPC<-""
-          while(readPC != "y" && readPC != "n"){
-           if(graphics==FALSE){readPC <- readline("Do you want to concatenate penalty?[y/n]")}
-		else{readPC<-.askforpenalty()
-		.repaint(ws,cards_hand)}
-            if(readPC=="y"){
-              pc<-TRUE
-            }
-            else if(readPC=="n"){
-              pc<-FALSE
-            }   
-           }
-         } 
-        if(!pc || !rulesbools[3]){
-  		  pen<-nwsFetchTry(ws, 'penalty')
-        .getpenalty(ws,pen,user,0)
-        nwsStore(ws, 'penalty', 0)
-        cards_hand <- nwsFindTry(ws, user)
-        }       
-			}
-			}
+
+				}
 			
 			
 			# PLAY CARD
@@ -191,7 +221,7 @@ playUno <- function(name,
 #     			unovec[playerInAction]<-FALSE
 # 			nwsStore(ws, 'uno', unovec)
 			tmp <- .playUnoCard(ws, cards_hand, played, 
-					computerPlayer=computerPlayer, computerPlayerFunction=computerPlayerFunction)
+					computerPlayer=computerPlayer, computerPlayerFunction=computerPlayerFunction,user)
 			card_play <- tmp[[1]]
 			card_play_save <- tmp[[2]]
 			
@@ -208,13 +238,27 @@ playUno <- function(name,
 	points<-nwsFindTry(ws,'points')
 	sumpoints<-sum(points)
 	if(graphics){polygon(c(0.3,0.3,0.7,0.7),c(0.3,0.7,0.7,0.3),col="blanchedalmond",border=NA)
-	if( nwsFindTry(ws,'winner') == user ){
-		text(x=0.5,y=0.6,label=paste("!! CONGRATULATION,", nwsFindTry(ws,'winner'), " you won with",sumpoints,"points!!\n"),cex=1)
-	} else{
-		text(x=0.5,y=0.6,label=paste("Sorry you lost, winner:", nwsFindTry(ws,'winner'), ",with",sumpoints,"points!!\n"),cex=1)}
-	#close windows/X11
-	Sys.sleep(2)
-	dev.off()
+		if( nwsFindTry(ws,'winner') == user ){
+			text(x=0.5,y=0.6,label=paste("!! CONGRATULATION,", nwsFindTry(ws,'winner'), " you won with",sumpoints,"points!!\n"),cex=1)
+		} else{
+			text(x=0.5,y=0.6,label=paste("Sorry you lost, winner:", nwsFindTry(ws,'winner'), ",with",sumpoints,"points!!\n"),cex=1)}
+		#close windows/X11
+		#Sys.sleep(2)
+		if(computerPlayer==FALSE){
+			clicked<-FALSE
+			.drawsquarebutton(xval=0.5,yval=0.5,size=3,type=2,clicked=F,color="mediumseagreen")
+			while(clicked==FALSE){
+				klick<-locator(n=1)
+				kx<-klick[[1]]
+				ky<-klick[[2]]
+				if(kx>(0.5-(3/100))&& kx<(0.5+(3/100)) && ky>(0.5-(3/100)) && ky<(0.5+(3/100))){
+					.drawsquarebutton(xval=0.5,yval=0.5,size=3,type=2,clicked=T,color="mediumseagreen")
+					Sys.sleep(0.5) 
+					clicked<-TRUE  		
+				}
+			}
+		} 	
+		dev.off()
 	}
 	else{
 		if( nwsFindTry(ws,'winner') == user ){
@@ -285,7 +329,7 @@ computerPlayerUNO <- function(ws, hand, card_played)
 # Function to get played card
 ################################################
 .playUnoCard <- function(ws, cards_hand, played, 
-		computerPlayer=FALSE, computerPlayerFunction=computerPlayerUNO)
+		computerPlayer=FALSE, computerPlayerFunction=computerPlayerUNO,user)
 {
   graphics <- nwsFindTry(ws, 'graphics')
   if(computerPlayer == TRUE){
@@ -328,7 +372,7 @@ computerPlayerUNO <- function(ws, hand, card_played)
 						success<-T 
 						if(buttonlist[[c]][[6]]=="Help"){
 							.showhelp()
-							.repaint(ws,cards_hand)
+							.repaint(ws,cards_hand,user)
 						 print("test")
               card_play<-"get-info"		
 						}
@@ -350,7 +394,7 @@ computerPlayerUNO <- function(ws, hand, card_played)
       			if(graphics==FALSE){col <- readline("Color: ")}
 			else{
 			col<-.askforcolor()
-			.repaint(ws,cards_hand)}
+			.repaint(ws,cards_hand,user)}
 			colbool<-(.colcheck(col))
 			}
 			card_play_save <- paste(col, "rybg", sep="-")
@@ -359,7 +403,7 @@ computerPlayerUNO <- function(ws, hand, card_played)
 			# ask for color by wish card
       			if(graphics==FALSE){col <- readline("Color: ")}
 			else{col<-.askforcolor()
-			.repaint(ws,cards_hand)}
+			.repaint(ws,cards_hand,user)}
 			colbool<-(.colcheck(col))
 			}
 			card_play_save <- paste(col, "rybg4+", sep="-")
@@ -550,15 +594,37 @@ computerPlayerUNO <- function(ws, hand, card_played)
   for(i in 1:number){
   cards_hand<-c(cards_hand, nwsFetchTry(ws,'cards'))
   }
+  nwsStore(ws,playerInAction,cards_hand)
   graphics <- nwsFindTry(ws, 'graphics')
+  cpu <- nwsFindTry(ws, 'cpu')
+  players<-nwsFindTry(ws,'players_logedin')
+  for(c in 1:length(players)){
+     if(players[[c]]==playerInAction){
+	cpuval<-cpu[c]
+     }
+  }
+print(cpuval)
   if(graphics==FALSE){cat("You got ",number," penalty card(s)",reason,"!\n")}
-  else{
+  else if(cpuval==FALSE){
+	xbut<-0.5
+	ybut<-0.4
 	polygon(c(0.3,0.3,0.7,0.7),c(0.3,0.7,0.7,0.3),col="blanchedalmond",border=NA)
 	text(x=0.5,y=0.6,label=paste("You got ",number," penalty card(s) ,\n",reason,"!\n"),cex=1)
-	Sys.sleep(1)}
-  nwsStore(ws,playerInAction,cards_hand)
+	clicked<-FALSE
+	.drawsquarebutton(xval=xbut,yval=ybut,size=4,type=2,clicked=FALSE,color="mediumseagreen")
+  	while(clicked==FALSE){
+		klick<-locator(n=1)
+		kx<-klick[[1]]
+		ky<-klick[[2]]
+		if(kx>(xbut-(3/100))&& kx<(xbut+(3/100)) && ky>(ybut-(3/100)) && ky<(ybut+(3/100))){
+			.drawsquarebutton(xval=xbut,yval=ybut,size=4,type=2,clicked=TRUE,color="mediumseagreen")
+ 		   	Sys.sleep(0.5) 
+      			clicked<-TRUE	
+		}
+  	} 	
+  }
   	if(graphics==FALSE){cat("Hand:", sort(unlist(cards_hand)), "\n")} #sorted output
-	else{.repaint(ws,cards_hand)}
+	else{.repaint(ws,cards_hand,playerInAction)}
 }
 ########################################################
 #Function to remove card from hand
@@ -570,11 +636,11 @@ computerPlayerUNO <- function(ws, hand, card_played)
   len<-length(cards_hand)
   cards_hand <- cards_hand[-which(cards_hand==card_play)]
   dif<-len-length(cards_hand)
-  if(dif > 1 && !rulesbools[4]){                                   
- 	  cards_hand<-c(cards_hand,card_play)  
+  if(dif > 1 && !rulesbools[4]){
+ 	  cards_hand<-c(cards_hand,card_play)
  	}
  	nwsStore(ws,user,cards_hand)
-}                             
+}
 #######################################################
 #(Play card, check for winner, go to next)-Function
 #######################################################
@@ -855,11 +921,9 @@ computerPlayerUNO <- function(ws, hand, card_played)
 ##################################################################################
 #Function to repaint the display
 ##################################################################################
-.repaint<-function(ws,cards_hand)
+.repaint<-function(ws,cards_hand,user)
 {
 	require(nws)
-	playercoord<-list(c(0.5,0.05),c(0.5,0.95),c(0.05,0.35),c(0.95,0.65),c(0.05,0.65),c(0.95,0.35),c(0.15,0.1),
-	c(0.85,0.9),c(0.85,0.1),c(0.15,0.9))
 	cardcoord<-list()
 	plot.new()
 	#create and draw buttons
@@ -869,6 +933,12 @@ computerPlayerUNO <- function(ws, hand, card_played)
 	}
 	players<-nwsFindTry(ws,'players_logedin')		
 	# draw players
+	seatcoord<-list(c(0.5,0.05),c(0.85,0.1),c(0.95,0.35),c(0.95,0.65),c(0.85,0.9),c(0.5,0.95),c(0.15,0.9),c(0.05,0.65),c(0.05,0.35),c(0.15,0.1))
+	factor<-floor(10/length(players))
+	playercoord<-vector()
+	for(k in 1:length(players)){
+		playercoord[k]<-seatcoord[k*factor]
+	}
 	unovec<-nwsFindTry(ws, 'uno')	
 	for(k in 1:length(players)){
 		x<-playercoord[[k]][1]
@@ -895,7 +965,14 @@ computerPlayerUNO <- function(ws, hand, card_played)
 			color=strsplit(unlist(cards_hand[[cc]]), "-")[[1]][1],
 			size=cardcoord[[cc]][[3]])
 	}
-
+  #show own player
+  for(ccc in 1:length(players)){
+     if(players[[ccc]]==user){
+      koord<-playercoord[[ccc]]
+     }
+  }  
+	parameter<-0.05
+  polygon(c(koord[1]-parameter,koord[1]-parameter,koord[1]+parameter,koord[1]+parameter),c(koord[2]-parameter,koord[2]+parameter,koord[2]+parameter,koord[2]-parameter),col="yellow",lwd=3,density = 0)
 }
 #########################################################################################
 #Function to calculate the positions of the cards

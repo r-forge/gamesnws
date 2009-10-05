@@ -31,6 +31,7 @@
 	nwsDeclare(ws, 'rules' , 'single') 	#vector of the rules
   	nwsDeclare(ws, 'rulesbools', 'single')	#vector of booleanvalues in order of rules 
 	nwsDeclare(ws,	'graphics', 'single')	#boolean if graphic device is shown
+	nwsDeclare(ws,	'cpu', 'single')	#vector of cpu-booleans, in order of players_logedin
 	#nwsDeclare(ws, 'buttonlist','single')	#list of buttons
 	#nwsDeclare(ws, 'cardcoord','single')	#list of coordinates of the cards
 	
@@ -206,6 +207,9 @@ startUnoGame <- function(wsName, cardsStart=7,
 	# set player_in_action and start game
 	nwsStore(ws, 'player_in_action', players[length(players)])
 	
+	#set startvalue for cpu
+	cpu<-rep(FALSE,10)
+	nwsStore(ws,'cpu',cpu)
 	#Debug information
 	if(debug){
 		nwsStore(ws,'debug',TRUE)
